@@ -1,10 +1,9 @@
-Flask-AtlassianConnect==0.1-dev
+Bottle-AtlassianConnect
 Jinja2==2.7.2
 MarkupSafe==0.18
 PyJWT==0.1.9
 aiohttp==0.6.0
 asyncio==0.3.1
-asyncio-mongo==0.1
+asyncio-mongo>=0.1
 asyncio-redis==0.6
-itsdangerous==0.23
-Flask-Async
+Bottle-Async
