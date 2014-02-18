@@ -1,5 +1,5 @@
 git+git://github.com/mrdon/bottle.git
-git+https://bitbucket.org/mrdon/bottle-ac.git
+git+https://bitbucket.org/mrdon/bottle-ac.git@371c7afaa273e6105cca1e03ae341ede096d1261
 Jinja2==2.7.2
 MarkupSafe==0.18
 PyJWT==0.1.9
