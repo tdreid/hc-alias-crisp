@@ -5,6 +5,7 @@ from bottle_ac import create_addon_app
 
 log = logging.getLogger(__name__)
 app = create_addon_app(__name__,
+                       debug=False,
                        plugin_key="hc-alias",
                        addon_name="HC Alias",
                        from_name="Alias",
@@ -180,6 +181,3 @@ def validate_mention_name(full_alias):
 
 if __name__ == "__main__":
     app.run(host="", reloader=True, debug=True)
-else:
-    aio_log = logging.getLogger("asyncio")
-    aio_log.setLevel(logging.WARN)
