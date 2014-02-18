@@ -1,4 +1,5 @@
 import logging
+import os
 import asyncio
 from bottle_ac import create_addon_app
 
@@ -8,6 +9,9 @@ app = create_addon_app(__name__,
                        addon_name="HC Alias",
                        from_name="Alias",
                        base_url="http://192.168.33.1:8080")
+
+app.config['MONGO_URL'] = os.environ.get("MONGOHQ_URL", None)
+app.config['REDIS_URL'] = os.environ.get("REDISTOGO_URL", None)
 
 
 invalid_mention_name_chars = '<>~!@#$%^&*()=+[]{}\\|:;\'"/,.-_'
