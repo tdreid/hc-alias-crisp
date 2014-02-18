@@ -180,3 +180,6 @@ def validate_mention_name(full_alias):
 
 if __name__ == "__main__":
     app.run(host="", reloader=True, debug=True)
+else:
+    aio_log = logging.getLogger("asyncio")
+    aio_log.setLevel(logging.WARN)
