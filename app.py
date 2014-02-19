@@ -1,7 +1,7 @@
 import logging
 import os
 import asyncio
-from bottle_ac import create_addon_app
+from bottle_ac import create_addon_app, RoomNotificationArgumentParser
 
 log = logging.getLogger(__name__)
 app = create_addon_app(__name__,
@@ -9,7 +9,7 @@ app = create_addon_app(__name__,
                        plugin_key="hc-alias",
                        addon_name="HC Alias",
                        from_name="Alias",
-                       base_url="http://192.168.33.1:8080")
+                       base_url="http://192.168.33.1:5000")
 
 app.config['MONGO_URL'] = os.environ.get("MONGOHQ_URL", None)
 app.config['REDIS_URL'] = os.environ.get("REDISTOGO_URL", None)
@@ -64,60 +64,84 @@ def alias(request, response):
     body = request.json
     client_id = body['oauth_client_id']
     client = yield from app.addon.load_client(client_id)
-    txt = body['item']["message"]["message"][len("/alias"):]
-    from_mention = body['item']['message']['from']['mention_name']
 
-    items = [x for x in txt.split(" ") if x]
-    if len(items) < 2:
-        yield from client.send_notification(app.addon, from_mention=from_mention,
-                                            text="Missing mention names to assign to alias. Format: "
-                                                 "/alias @ALIAS @MENTION_1 [@MENTION_2...]")
-        response.status = 204
-        return
-
-    try:
-        for item in items:
-            validate_mention_name(item)
-    except ValueError as e:
-        yield from client.send_notification(app.addon, from_mention=from_mention,
-                                            text=str(e))
-        return
-
-    alias_name = items[0]
-    mentions = items[1:]
-
-    existing = yield from find_alias(app.addon, client, alias_name)
-    if existing and 'webhook_url' in existing:
-        yield from client.delete_webhook(app.addon, existing['webhook_url'])
-
-    webhook_url = yield from client.post_webhook(app.addon,
-                                                 url="%s/mention/%s" % (app.config.get("BASE_URL"), alias_name),
-                                                 pattern=".*%s(?:$| ).*" % alias_name,
-                                                 name="Alias %s" % alias_name)
-    if webhook_url:
-        aliases = app.addon.mongo_db['aliases']
-        spec = {
-            "client_id": client_id,
-            "group_id": client.group_id,
-            "capabilities_url": client.capabilities_url,
-            "alias": alias_name
-        }
-        data = {
-            'mentions': mentions,
-            'webhook_url': webhook_url
-        }
-        if existing:
-            existing.update(data)
-            yield from aliases.update(spec, existing)
+    @asyncio.coroutine
+    def list_aliases(_):
+        aliases = yield from find_all_alias(app.addon, client)
+        if not aliases:
+            return "No aliases registered"
         else:
-            data.update(spec)
-            yield from aliases.insert(data)
-        yield from client.send_notification(app.addon, from_mention=from_mention,
-                                            text="Alias added webhook")
-    else:
-        yield from client.send_notification(app.addon, from_mention=from_mention,
-                                            text="Problem registering webhook")
-        response.status = 400
+            return "Aliases registered: %s" % ", ".join([a['alias'] for a in aliases])
+
+    @asyncio.coroutine
+    def set_alias(args):
+        try:
+            for item in args.mentions + [args.alias]:
+                validate_mention_name(item)
+        except ValueError as e:
+            return str(e)
+
+        existing = yield from find_alias(app.addon, client, args.alias)
+        if existing and 'webhook_url' in existing:
+            yield from client.delete_webhook(app.addon, existing['webhook_url'])
+
+        webhook_url = yield from client.post_webhook(app.addon,
+                                                     url="%s/mention/%s" % (app.config.get("BASE_URL"), args.alias),
+                                                     pattern="^(?!/alias).*%s(?:$| ).*" % args.alias,
+                                                     name="Alias %s" % args.alias)
+        if webhook_url:
+            aliases = app.addon.mongo_db['aliases']
+            spec = {
+                "client_id": client_id,
+                "group_id": client.group_id,
+                "capabilities_url": client.capabilities_url,
+                "alias": args.alias
+            }
+            data = {
+                'mentions': args.mentions,
+                'webhook_url': webhook_url
+            }
+            if existing:
+                existing.update(data)
+                yield from aliases.update(spec, existing)
+            else:
+                data.update(spec)
+                yield from aliases.insert(data)
+            return "Alias added webhook"
+        else:
+            return "Problem registering webhook"
+
+    @asyncio.coroutine
+    def remove_alias(args):
+        try:
+            validate_mention_name(args.alias)
+        except ValueError as e:
+            return str(e)
+
+        existing = yield from find_alias(app.addon, client, args.alias)
+        if existing and 'webhook_url' in existing:
+            yield from client.delete_webhook(app.addon, existing['webhook_url'])
+            aliases = app.addon.mongo_db['aliases']
+            yield from aliases.remove(existing)
+            return "Alias %s removed" % args.alias
+        else:
+            return "Alias %s not found" % args.alias
+
+    parser = RoomNotificationArgumentParser(app, "/alias", client)
+    subparsers = parser.add_subparsers(help='Available commands')
+
+    subparsers.add_parser('list', help='List existing aliases', handler=list_aliases)
+
+    parser_set = subparsers.add_parser('set', help='Sets a group mention alias', handler=set_alias)
+    parser_set.add_argument('alias', metavar='@ALIAS', type=str, help='The mention alias, beginning with an "@"')
+    parser_set.add_argument('mentions', metavar='@MENTION', nargs='+', type=str,
+                            help='The mention names, beginning with an "@"')
+
+    parser_set = subparsers.add_parser('remove', help='Removes a group mention alias', handler=remove_alias)
+    parser_set.add_argument('alias', metavar='@ALIAS', type=str, help='The mention alias, beginning with an "@"')
+
+    yield from parser.handle_webhook(body)
+    response.status = 204
 
 
 @app.route('/mention/<alias_name>', method='POST')
@@ -152,6 +176,16 @@ def find_alias(addon, client, name):
         "alias": name
     })
     return result
+
+@asyncio.coroutine
+def find_all_alias(addon, client):
+    aliases = addon.mongo_db['aliases']
+    results = yield from aliases.find({
+        "client_id": client.id,
+        "group_id": client.group_id,
+        "capabilities_url": client.capabilities_url
+    })
+    return results
 
 
 def validate_mention_name(full_alias):
