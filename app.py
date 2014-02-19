@@ -107,7 +107,7 @@ def alias(request, response):
             else:
                 data.update(spec)
                 yield from aliases.insert(data)
-            return "Alias added webhook"
+            return "Alias %s added" % args.alias
         else:
             return "Problem registering webhook"
 
