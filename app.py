@@ -15,9 +15,6 @@ app.config['MONGO_URL'] = os.environ.get("MONGOHQ_URL", None)
 app.config['REDIS_URL'] = os.environ.get("REDISTOGO_URL", None)
 
 
-invalid_mention_name_chars = '<>~!@#$%^&*()=+[]{}\\|:;\'"/,.-_'
-
-
 # noinspection PyUnusedLocal
 @app.route('/')
 def capabilities(request, response):
@@ -186,6 +183,9 @@ def find_all_alias(addon, client):
         "capabilities_url": client.capabilities_url
     })
     return results
+
+
+invalid_mention_name_chars = '<>~!@#$%^&*()=+[]{}\\|:;\'"/,.-_'
 
 
 def validate_mention_name(full_alias):
