@@ -8,5 +8,5 @@ PyJWT==0.1.9
 aiohttp==0.6.0
 asyncio==0.3.1
 # asyncio-mongo>=0.2.3
-git+git://bitbucket.org/mrdon/asyncio-mongo.git#egg=asyncio-mongo_mrdon
+git+https://bitbucket.org/mrdon/asyncio-mongo.git#egg=asyncio-mongo_mrdon
 gunicorn==18.0
