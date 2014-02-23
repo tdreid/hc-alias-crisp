@@ -57,6 +57,7 @@ def capabilities(request, response):
 @app.route('/alias', method='POST')
 @asyncio.coroutine
 def alias(request, response):
+    foo = yield from app.addon.redis.get('asdf')
     body = request.json
     client_id = body['oauth_client_id']
     client = yield from app.addon.load_client(client_id)
@@ -86,7 +87,7 @@ def alias(request, response):
                                                      pattern="^(?!/alias).*%s(?:$| ).*" % args.alias,
                                                      name="Alias %s" % args.alias)
         if webhook_url:
-            aliases = app.addon.mongo_db['aliases']
+            aliases = _aliases_db(app.addon)
             spec = {
                 "client_id": client_id,
                 "group_id": client.group_id,
@@ -117,8 +118,7 @@ def alias(request, response):
         existing = yield from find_alias(app.addon, client, args.alias)
         if existing and 'webhook_url' in existing:
             yield from client.delete_webhook(app.addon, existing['webhook_url'])
-            aliases = app.addon.mongo_db['aliases']
-            yield from aliases.remove(existing)
+            yield from _aliases_db(app.addon).remove(existing)
             return "Alias %s removed" % args.alias
         else:
             return "Alias %s not found" % args.alias
@@ -164,8 +164,7 @@ def mention(request, response, alias_name):
 
 @asyncio.coroutine
 def find_alias(addon, client, name):
-    aliases = addon.mongo_db['aliases']
-    result = yield from aliases.find_one({
+    result = yield from _aliases_db(addon).find_one({
         "client_id": client.id,
         "group_id": client.group_id,
         "capabilities_url": client.capabilities_url,
@@ -173,15 +172,19 @@ def find_alias(addon, client, name):
     })
     return result
 
+
 @asyncio.coroutine
 def find_all_alias(addon, client):
-    aliases = addon.mongo_db['aliases']
-    results = yield from aliases.find({
+    results = yield from _aliases_db(addon).find({
         "client_id": client.id,
         "group_id": client.group_id,
         "capabilities_url": client.capabilities_url
     })
     return results
+
+
+def _aliases_db(addon):
+    return addon.mongo_db.default_database['aliases']
 
 
 invalid_mention_name_chars = '<>~!@#$%^&*()=+[]{}\\|:;\'"/,.-_'
