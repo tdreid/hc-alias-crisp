@@ -21,7 +21,7 @@ def init():
     def _send_welcome(event):
         client = event['client']
         yield from client.send_notification(app.addon, text="HC Alias was added to this room")
-        parser = RoomNotificationArgumentParser(app, "/alias", client)
+        parser = _create_parser(client)
         parser.send_usage()
         yield from parser.task
 
@@ -75,80 +75,7 @@ def alias(request, response):
     body = request.json
     client_id = body['oauth_client_id']
     client = yield from app.addon.load_client(client_id)
-
-    @asyncio.coroutine
-    def list_aliases(_):
-        aliases = yield from find_all_alias(app.addon, client)
-        if not aliases:
-            return "No aliases registered"
-        else:
-            return "Aliases registered: %s" % ", ".join([a['alias'] for a in aliases])
-
-    @asyncio.coroutine
-    def set_alias(args):
-        try:
-            for item in args.mentions + [args.alias]:
-                validate_mention_name(item)
-        except ValueError as e:
-            return str(e)
-
-        existing = yield from find_alias(app.addon, client, args.alias)
-        if existing and 'webhook_url' in existing:
-            yield from client.delete_webhook(app.addon, existing['webhook_url'])
-
-        webhook_url = yield from client.post_webhook(app.addon,
-                                                     url="%s/mention/%s" % (app.config.get("BASE_URL"), args.alias),
-                                                     pattern="^(?!/alias).*%s(?:$| ).*" % args.alias,
-                                                     name="Alias %s" % args.alias)
-        if webhook_url:
-            aliases = _aliases_db(app.addon)
-            spec = {
-                "client_id": client_id,
-                "group_id": client.group_id,
-                "capabilities_url": client.capabilities_url,
-                "alias": args.alias
-            }
-            data = {
-                'mentions': args.mentions,
-                'webhook_url': webhook_url
-            }
-            if existing:
-                existing.update(data)
-                yield from aliases.update(spec, existing)
-            else:
-                data.update(spec)
-                yield from aliases.insert(data)
-            return "Alias %s added" % args.alias
-        else:
-            return "Problem registering webhook"
-
-    @asyncio.coroutine
-    def remove_alias(args):
-        try:
-            validate_mention_name(args.alias)
-        except ValueError as e:
-            return str(e)
-
-        existing = yield from find_alias(app.addon, client, args.alias)
-        if existing and 'webhook_url' in existing:
-            yield from client.delete_webhook(app.addon, existing['webhook_url'])
-            yield from _aliases_db(app.addon).remove(existing)
-            return "Alias %s removed" % args.alias
-        else:
-            return "Alias %s not found" % args.alias
-
-    parser = RoomNotificationArgumentParser(app, "/alias", client)
-    subparsers = parser.add_subparsers(help='Available commands')
-
-    subparsers.add_parser('list', help='List existing aliases', handler=list_aliases)
-
-    parser_set = subparsers.add_parser('set', help='Sets a group mention alias', handler=set_alias)
-    parser_set.add_argument('alias', metavar='@ALIAS', type=str, help='The mention alias, beginning with an "@"')
-    parser_set.add_argument('mentions', metavar='@MENTION', nargs='+', type=str,
-                            help='The mention names, beginning with an "@"')
-
-    parser_set = subparsers.add_parser('remove', help='Removes a group mention alias', handler=remove_alias)
-    parser_set.add_argument('alias', metavar='@ALIAS', type=str, help='The mention alias, beginning with an "@"')
+    parser = _create_parser(client)
 
     yield from parser.handle_webhook(body)
     response.status = 204
@@ -195,6 +122,85 @@ def find_all_alias(addon, client):
         "capabilities_url": client.capabilities_url
     })
     return results
+
+
+def _create_parser(client):
+
+    @asyncio.coroutine
+    def list_aliases(_):
+        aliases = yield from find_all_alias(app.addon, client)
+        if not aliases:
+            return "No aliases registered"
+        else:
+            return "Aliases registered: %s" % ", ".join([a['alias'] for a in aliases])
+
+    @asyncio.coroutine
+    def set_alias(args):
+        try:
+            for item in args.mentions + [args.alias]:
+                validate_mention_name(item)
+        except ValueError as e:
+            return str(e)
+
+        existing = yield from find_alias(app.addon, client, args.alias)
+        if existing and 'webhook_url' in existing:
+            yield from client.delete_webhook(app.addon, existing['webhook_url'])
+
+        webhook_url = yield from client.post_webhook(app.addon,
+                                                     url="%s/mention/%s" % (app.config.get("BASE_URL"), args.alias),
+                                                     pattern="^(?!/alias).*%s(?:$| ).*" % args.alias,
+                                                     name="Alias %s" % args.alias)
+        if webhook_url:
+            aliases = _aliases_db(app.addon)
+            spec = {
+                "client_id": client.id,
+                "group_id": client.group_id,
+                "capabilities_url": client.capabilities_url,
+                "alias": args.alias
+            }
+            data = {
+                'mentions': args.mentions,
+                'webhook_url': webhook_url
+            }
+            if existing:
+                existing.update(data)
+                yield from aliases.update(spec, existing)
+            else:
+                data.update(spec)
+                yield from aliases.insert(data)
+            return "Alias %s added" % args.alias
+        else:
+            return "Problem registering webhook"
+
+    @asyncio.coroutine
+    def remove_alias(args):
+        try:
+            validate_mention_name(args.alias)
+        except ValueError as e:
+            return str(e)
+
+        existing = yield from find_alias(app.addon, client, args.alias)
+        if existing and 'webhook_url' in existing:
+            yield from client.delete_webhook(app.addon, existing['webhook_url'])
+            yield from _aliases_db(app.addon).remove(existing)
+            return "Alias %s removed" % args.alias
+        else:
+            return "Alias %s not found" % args.alias
+
+    parser = RoomNotificationArgumentParser(app, "/alias", client)
+    subparsers = parser.add_subparsers(help='Available commands')
+
+    subparsers.add_parser('list', help='List existing aliases', handler=list_aliases)
+
+    parser_set = subparsers.add_parser('set', help='Sets a group mention alias', handler=set_alias)
+    parser_set.add_argument('alias', metavar='@ALIAS', type=str, help='The mention alias, beginning with an "@"')
+    parser_set.add_argument('mentions', metavar='@MENTION', nargs='+', type=str,
+                            help='The mention names, beginning with an "@"')
+
+    parser_set = subparsers.add_parser('remove', help='Removes a group mention alias', handler=remove_alias)
+    parser_set.add_argument('alias', metavar='@ALIAS', type=str, help='The mention alias, beginning with an "@"')
+
+    return parser
 
 
 def _aliases_db(addon):
