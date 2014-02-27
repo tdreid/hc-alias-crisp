@@ -23,8 +23,7 @@ def init():
         yield from client.send_notification(app.addon, text="HC Alias was added to this room")
         parser = RoomNotificationArgumentParser(app, "/alias", client)
         parser.send_usage()
-        if parser.task:
-            yield from parser.task
+        yield from parser.task
 
     app.addon.register_event('install', _send_welcome)
 app.add_hook('before_first_request', init)
