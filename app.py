@@ -14,6 +14,21 @@ app.config['MONGO_URL'] = os.environ.get("MONGOHQ_URL", None)
 app.config['REDIS_URL'] = os.environ.get("REDISTOGO_URL", None)
 
 
+def init():
+    log.info("Initializing welcome message")
+
+    @asyncio.coroutine
+    def _send_welcome(event):
+        client = event['client']
+        yield from client.send_notification(app.addon, text="HC Alias was added to this room")
+        parser = RoomNotificationArgumentParser(app, "/alias", client)
+        parser.send_usage()
+        yield from parser.task
+
+    app.addon.register_event('install', _send_welcome)
+app.add_hook('before_first_request', init)
+
+
 # noinspection PyUnusedLocal
 @app.route('/')
 def capabilities(request, response):
