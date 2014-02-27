@@ -57,7 +57,6 @@ def capabilities(request, response):
 @app.route('/alias', method='POST')
 @asyncio.coroutine
 def alias(request, response):
-    foo = yield from app.addon.redis.get('asdf')
     body = request.json
     client_id = body['oauth_client_id']
     client = yield from app.addon.load_client(client_id)
