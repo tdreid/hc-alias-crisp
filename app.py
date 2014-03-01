@@ -15,8 +15,6 @@ app.config['REDIS_URL'] = os.environ.get("REDISTOGO_URL", None)
 
 
 def init():
-    log.info("Initializing welcome message")
-
     @asyncio.coroutine
     def _send_welcome(event):
         client = event['client']
