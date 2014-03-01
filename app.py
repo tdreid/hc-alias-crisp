@@ -208,10 +208,7 @@ def _aliases_db(addon):
 invalid_mention_name_chars = '<>~!@#$%^&*()=+[]{}\\|:;\'"/,.-_'
 
 
-def validate_mention_name(full_alias):
-    """
-    @type full_alias: str
-    """
+def validate_mention_name(full_alias: str):
 
     if full_alias is None:
         raise ValueError("The mention name is required")
