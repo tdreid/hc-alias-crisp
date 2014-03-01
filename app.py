@@ -97,7 +97,7 @@ def mention(request, response, alias_name):
         yield from client.send_notification(app.addon, from_mention=from_mention, text=txt)
         response.status = 204
     else:
-        log.error("Mention name '%s' not found" % alias_name)
+        log.error("Mention name '%s' not found for client %s" % (alias_name, client_id))
         response.status = 400
 
 
