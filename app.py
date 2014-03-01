@@ -128,7 +128,7 @@ def _create_parser(client):
     def list_aliases(_):
         aliases = yield from find_all_alias(app.addon, client)
         if not aliases:
-            return "No aliases registered"
+            return "No aliases registered. Register one with '/alias set @ALIAS @MENTION...'"
         else:
             return "Aliases registered: %s" % ", ".join([a['alias'] for a in aliases])
 
