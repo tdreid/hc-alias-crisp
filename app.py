@@ -1,7 +1,7 @@
 import logging
 import os
 import asyncio
-from bottle_ac import create_addon_app, RoomNotificationArgumentParser
+from bottle_ac import create_addon_app, RoomNotificationArgumentParser, validate_mention_name
 
 log = logging.getLogger(__name__)
 app = create_addon_app(__name__,
@@ -203,31 +203,6 @@ def _create_parser(client):
 
 def _aliases_db(addon):
     return addon.mongo_db.default_database['aliases']
-
-
-invalid_mention_name_chars = '<>~!@#$%^&*()=+[]{}\\|:;\'"/,.-_'
-
-
-def validate_mention_name(full_alias: str):
-
-    if full_alias is None:
-        raise ValueError("The mention name is required")
-
-    if not full_alias.startswith("@"):
-        raise ValueError("The mention name must begin with a '@'")
-
-    if not 0 < len(full_alias) < 50:
-        raise ValueError("The mention name must be between 0 and 50 characters")
-
-    name = full_alias[1:]
-    if name in ["all", "aii", "hipchat"]:
-        raise ValueError("The mention name is not valid")
-
-    if any(x in name for x in invalid_mention_name_chars):
-        raise ValueError("The mention name cannot contain certain characters: %s" %
-                         invalid_mention_name_chars)
-    if ' ' in name:
-        raise ValueError("The mention name cannot contain multiple words")
 
 
 if __name__ == "__main__":

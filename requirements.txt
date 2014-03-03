@@ -5,8 +5,8 @@ git+git://github.com/mrdon/asyncio-redis.git#egg=asyncio-redis_mrdon
 Jinja2==2.7.2
 MarkupSafe==0.18
 PyJWT==0.1.9
-aiohttp==0.6.0
-asyncio==0.3.1
+aiohttp==0.6.4
+asyncio==0.4.1
 # Use master until this reconnect issue gets sorted
 # asyncio-mongo>=0.2.3
 git+https://bitbucket.org/mrdon/asyncio-mongo.git#egg=asyncio-mongo_mrdon
