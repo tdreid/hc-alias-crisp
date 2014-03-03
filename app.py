@@ -60,7 +60,7 @@ def capabilities(request, response):
                 {
                     "url": app.config.get("BASE_URL") + "/alias",
                     "event": "room_message",
-                    "pattern": "^/alias.*"
+                    "pattern": "^/alias(\s|$).*"
                 }
             ],
         }
