@@ -1,7 +1,7 @@
 import logging
 import os
 import asyncio
-from bottle_ac import create_addon_app, RoomNotificationArgumentParser, validate_mention_name
+from bottle_ac import create_addon_app, RoomNotificationArgumentParser, validate_mention_name, HtmlNotification
 
 log = logging.getLogger(__name__)
 app = create_addon_app(__name__,
@@ -185,6 +185,20 @@ def _create_parser(client):
         else:
             return "Alias %s not found" % args.alias
 
+    @asyncio.coroutine
+    def show_alias(args):
+        try:
+            validate_mention_name(args.alias)
+        except ValueError as e:
+            return str(e)
+
+        existing = yield from find_alias(app.addon, client, args.alias)
+        if existing and 'webhook_url' in existing:
+            mentions = ['&commat;%s' % x[1:] for x in existing['mentions']]
+            return HtmlNotification("Alias %s is mapped to %s" % (args.alias, ", ".join(mentions)))
+        else:
+            return "Alias %s not found" % args.alias
+
     parser = RoomNotificationArgumentParser(app, "/alias", client)
     subparsers = parser.add_subparsers(help='Available commands')
 
@@ -197,6 +211,9 @@ def _create_parser(client):
 
     parser_set = subparsers.add_parser('remove', help='Removes a group mention alias', handler=remove_alias)
     parser_set.add_argument('alias', metavar='@ALIAS', type=str, help='The mention alias, beginning with an "@"')
+
+    parser_show = subparsers.add_parser('show', help='Shows the names for an existing alias', handler=show_alias)
+    parser_show.add_argument('alias', metavar='@ALIAS', type=str, help='The mention alias, beginning with an "@"')
 
     return parser
 
