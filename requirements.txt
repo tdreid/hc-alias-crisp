@@ -1,5 +1,5 @@
 git+git://github.com/mrdon/bottle.git
-git+https://bitbucket.org/mrdon/bottle-ac.git@master#egg=fuckyouheroku
+git+https://bitbucket.org/atlassianlabs/bottle-ac.git@master#egg=fuckyouheroku
 # Use asyncio-redis fork bad handling of connection timeouts
 git+git://github.com/mrdon/asyncio-redis.git#egg=asyncio-redis_mrdon
 Jinja2==2.7.2
