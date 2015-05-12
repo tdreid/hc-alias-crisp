@@ -122,6 +122,10 @@ def find_all_alias(addon, client):
     return results
 
 
+def create_webhook_pattern(alias):
+    return "(?:(?:^[^/]|\/[^a]|\/a[^l]|\/ali[^a]|\/alia[^s]).*|^)%s(?:$| ).*" % alias
+
+
 def _create_parser(client):
 
     @asyncio.coroutine
@@ -146,7 +150,7 @@ def _create_parser(client):
 
         webhook_url = yield from client.post_webhook(app.addon,
                                                      url="%s/mention/%s" % (app.config.get("BASE_URL"), args.alias),
-                                                     pattern="^(?!/alias).*%s(?:$| ).*" % args.alias,
+                                                     pattern=create_webhook_pattern(args.alias),
                                                      name="Alias %s" % args.alias)
         if webhook_url:
             aliases = _aliases_db(app.addon)
