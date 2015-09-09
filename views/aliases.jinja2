@@ -1,0 +1,16 @@
+{% for alias in aliases %}
+    <tr class="alias" data-alias="{{alias['alias']}}">
+        <td>
+            <span class="hc-mention hc-mention-me">{{alias['alias']}}</span>
+        </td>
+        <td class="mentions">
+            {% for mention in alias['mentions'] %}
+                <span class="hc-mention">{{mention}}</span>
+            {% endfor %}
+        </td>
+        <td class="actions aui-compact-button-column">
+            <a class="aui-icon aui-icon-small aui-iconfont-edit edit">Edit</a>
+            <a class="aui-icon aui-icon-small aui-iconfont-delete delete">Delete</a>
+        </td>
+    </tr>
+{% endfor %}
