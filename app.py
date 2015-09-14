@@ -8,10 +8,12 @@ from aiohttp_ac_hipchat.addon_app import create_addon_app
 import asyncio
 from util import HtmlNotification
 from util import RoomNotificationArgumentParser
+from alias_controller import AliasController
 
 SCOPES_V2 = ["view_group", "send_notification", "admin_room", "view_room"]
 
 FROM_NAME = "Alias"
+PARTICIPANTS_CACHE_KEY = "hipchat-participants:{group_id}:{room_id}"
 
 log = logging.getLogger(__name__)
 app, addon = create_addon_app(plugin_key="hc-alias-test",
@@ -19,7 +21,25 @@ app, addon = create_addon_app(plugin_key="hc-alias-test",
                        from_name=FROM_NAME,
                        scopes=SCOPES_V2)
 
-aiohttp_jinja2.setup(app, autoescape=True, loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), 'views')))
+static_folder = os.path.join(os.path.dirname(__file__), 'assets')
+static_route = app.router.add_static('/assets', static_folder, name='static')
+
+env = aiohttp_jinja2.setup(app, autoescape=True,
+                             loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), 'views')))
+
+def url_for(route, filename):
+    parameters = {}
+    if "static" == route:  # add DEBUG/DEV check
+        parameters["hash"] = static_file_hash(os.path.join(static_folder, filename))
+    
+    return app.router[route].url(filename=filename, query=parameters)
+
+def static_file_hash(filename):
+    return int(os.stat(filename).st_mtime)
+
+env.globals['url_for'] = url_for
+
+alias_controller = AliasController(app["config"]["BASE_URL"], app['mongodb'].default_database['aliases'])
 
 @asyncio.coroutine
 def init(app):
@@ -125,7 +145,7 @@ def mention(request):
     client_id = body['oauth_client_id']
     client = yield from addon.load_client(client_id)
 
-    existing = yield from find_alias(client, alias_name)
+    existing = yield from alias_controller.find_alias(client, alias_name)
     if existing:
         mentions = existing['mentions']
 
@@ -156,16 +176,16 @@ def dialog(request):
 
 @asyncio.coroutine
 @addon.require_jwt()
-@aiohttp_jinja2.template('aliases.jinja2')
-def get_aliases_view(request):
+def get_aliases(request):
     results = []
-    aliases = yield from find_all_alias(app, request.client)
-    for status in aliases:
-        results.append(alias_to_view(status))
+    aliases = yield from alias_controller.find_all_alias(request.client)
+    for alias in aliases:
+        results.append({
+            "alias": alias["alias"],
+            "mentions": alias["mentions"],
+        })
 
-    return {
-        "aliases": results
-    }
+    return web.Response(text=json.dumps(results))
 
 def alias_to_view(alias):
     return alias
@@ -174,39 +194,54 @@ def alias_to_view(alias):
 @addon.require_jwt()
 def delete_alias(request):
     alias_name = request.match_info['alias_name']
-    yield from remove_alias(alias_name, request.client)
+    yield from alias_controller.remove_alias(request.client, alias_name)
 
     return web.HTTPOk()
 
 @asyncio.coroutine
-def remove_alias(alias, client):
-    existing = yield from find_alias(client, alias)
-    if existing and 'webhook_url' in existing:
-        asyncio.gather(*[
-            client.room_client.delete_webhook(existing['webhook_url']),
-            _aliases_db(app).remove(existing)
-        ])
+@addon.require_jwt()
+def add_alias(request):
+    alias_name = request.match_info['alias_name']
+    body = yield from request.json()
 
-@asyncio.coroutine
-def find_alias(client, name):
-    result = yield from _aliases_db(app).find_one({
-        "client_id": client.id,
-        "group_id": client.group_id,
-        "capabilities_url": client.capabilities_url,
-        "alias": name
-    })
-    return result
+    yield from alias_controller.add_alias(request.client, alias_name, body["mentions"])
+    return (yield from get_aliases(request))
 
 
 @asyncio.coroutine
-def find_all_alias(app, client):
-    results = yield from _aliases_db(app).find({
-        "client_id": client.id,
-        "group_id": client.group_id,
-        "capabilities_url": client.capabilities_url
-    })
-    return results
+@addon.require_jwt()
+def edit_alias(request):
+    alias_name = request.match_info['alias_name']
+    body = yield from request.json()
 
+    client = request.client
+    yield from alias_controller.edit_alias(client, alias_name, body["mentions"])
+
+    return web.HTTPOk()
+
+@asyncio.coroutine
+@addon.require_jwt()
+def get_room_participants(request):
+
+    redis_pool = app['redis_pool']
+    room_id = request.jwt_data["context"]["room_id"]
+    cache_key = PARTICIPANTS_CACHE_KEY.format(group_id=request.client.group_id, room_id=room_id)
+    cached_data = (yield from redis_pool.get(cache_key))
+    results = json.loads(cached_data) if cached_data else None
+
+    if not results:
+        participants = yield from request.client.room_client.get_participants(room_id)
+
+        results = []
+        for participant in participants:
+            results.append({
+                "id": participant["id"],
+                "mention_name": participant["mention_name"]
+            })
+
+        yield from redis_pool.setex(key=cache_key, value=json.dumps(results), seconds=30)
+
+    return web.Response(text=json.dumps(results))
 
 def create_webhook_pattern(alias):
     return "(?:(?:^[^/]|\/[^a]|\/a[^l]|\/ali[^a]|\/alia[^s]).*|^)%s(?:$| ).*" % alias
@@ -216,7 +251,7 @@ def _create_parser(client, request):
 
     @asyncio.coroutine
     def list_aliases(_):
-        aliases = yield from find_all_alias(app, client)
+        aliases = yield from alias_controller.find_all_alias(client)
         if not aliases:
             return "No aliases registered. Register one with '/alias set @ALIAS @MENTION...'"
         else:
@@ -230,32 +265,8 @@ def _create_parser(client, request):
         except ValueError as e:
             return str(e)
 
-        existing = yield from find_alias(client, args.alias)
-        if existing and 'webhook_url' in existing:
-            yield from client.delete_webhook(app.addon, existing['webhook_url'])
-
-        webhook_url = yield from client.room_client.create_webhook(
-                                                     url="%s/mention/%s" % (request.app["config"]["BASE_URL"], args.alias),
-                                                     pattern=create_webhook_pattern(args.alias),
-                                                     name="Alias %s" % args.alias)
-        if webhook_url:
-            aliases = _aliases_db(app)
-            spec = {
-                "client_id": client.id,
-                "group_id": client.group_id,
-                "capabilities_url": client.capabilities_url,
-                "alias": args.alias
-            }
-            data = {
-                'mentions': args.mentions,
-                'webhook_url': webhook_url
-            }
-            if existing:
-                existing.update(data)
-                yield from aliases.update(spec, existing)
-            else:
-                data.update(spec)
-                yield from aliases.insert(data)
+        new_alias = yield from alias_controller.add_alias(client, args.alias, args.mentions)
+        if new_alias:
             return "Alias %s added" % args.alias
         else:
             return "Problem registering webhook"
@@ -267,10 +278,8 @@ def _create_parser(client, request):
         except ValueError as e:
             return str(e)
 
-        existing = yield from find_alias(client, args.alias)
-        if existing and 'webhook_url' in existing:
-            yield from client.room_client.delete_webhook(existing['webhook_url'])
-            yield from _aliases_db(app).remove(existing)
+        deleted_alias = yield from alias_controller.remove_alias(client, args.alias)
+        if deleted_alias:
             return "Alias %s removed" % args.alias
         else:
             return "Alias %s not found" % args.alias
@@ -282,7 +291,7 @@ def _create_parser(client, request):
         except ValueError as e:
             return str(e)
 
-        existing = yield from find_alias(client, args.alias)
+        existing = yield from alias_controller.find_alias(client, args.alias)
         if existing and 'webhook_url' in existing:
             mentions = ['&commat;%s' % x[1:] for x in existing['mentions']]
             return HtmlNotification("Alias %s is mapped to %s" % (args.alias, ", ".join(mentions)))
@@ -337,11 +346,13 @@ def validate_mention_name(mention_name: str):
 def _aliases_db(app):
     return app['mongodb'].default_database['aliases']
 
-app.router.add_static('/static', os.path.join(os.path.dirname(__file__), 'static'), name='static')
 app.router.add_route('GET', '/', capabilities)
 app.router.add_route('POST', '/alias', alias)
 app.router.add_route('DELETE', '/alias/{alias_name}', delete_alias)
+app.router.add_route('POST', '/alias/{alias_name}', add_alias)
+app.router.add_route('PUT', '/alias/{alias_name}', edit_alias)
 app.router.add_route('POST', '/mention/{alias_name}', mention)
 app.router.add_route('GET', '/dialog', dialog)
 app.router.add_route('GET', '/config', config)
-app.router.add_route('GET', '/aliases_view', get_aliases_view)
+app.router.add_route('GET', '/aliases', get_aliases)
+app.router.add_route('GET', '/room_participants', get_room_participants)

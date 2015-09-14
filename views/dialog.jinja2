@@ -2,21 +2,10 @@
 {% block title %}Alias{% endblock %}
 {% block head %}
     {{ super() }}
-    <script src="static/js/dialog.js"></script>
 {% endblock %}
 {% block content %}
-    <div class="dialog">
-        <table class="aui aui-table-interactive aliases-container">
-            <tbody class="aliases">
-
-            </tbody>
-        </table>
-
-{#        <select class="user-selector" multiple style="width: 100%">#}
-{##}
-{#        </select>#}
-
-        <div class="spinner-container"></div>
+    <div id="react-app">
 
     </div>
+
 {% endblock %}
