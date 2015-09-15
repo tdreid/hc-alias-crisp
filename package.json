@@ -6,7 +6,8 @@
   "scripts": {
     "build": "./node_modules/.bin/webpack --config webpack.dev.config.js --progress --colors",
     "watch": "./node_modules/.bin/webpack --config webpack.dev.config.js --colors --watch",
-    "build-production": "./node_modules/.bin/webpack --config webpack.prod.config.js --progress --colors"
+    "build-production": "./node_modules/.bin/webpack --config webpack.prod.config.js --progress --colors",
+    "postinstall": "npm run build-production"
   },
   "repository": {
     "type": "git",
