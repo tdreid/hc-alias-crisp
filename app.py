@@ -26,21 +26,6 @@ app, addon = create_addon_app(addon_key="hc-alias",
 static_folder = os.path.join(os.path.dirname(__file__), 'assets')
 static_route = app.router.add_static('/assets', static_folder, name='static')
 
-env = aiohttp_jinja2.setup(app, autoescape=True,
-                             loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), 'views')))
-
-def url_for(route, filename):
-    parameters = {}
-    if "static" == route:  # add DEBUG/DEV check
-        parameters["hash"] = static_file_hash(os.path.join(static_folder, filename))
-    
-    return app.router[route].url(filename=filename, query=parameters)
-
-def static_file_hash(filename):
-    return int(os.stat(filename).st_mtime)
-
-env.globals['url_for'] = url_for
-
 alias_controller = AliasController(app["config"]["BASE_URL"], app['mongodb'].default_database['aliases'])
 
 @asyncio.coroutine
@@ -52,6 +37,23 @@ def init(app):
 
     app['addon'].register_event('install', send_welcome)
 
+def init_jinja2():
+    jinja2_env = aiohttp_jinja2.setup(app, autoescape=True,
+                                      loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), 'views')))
+
+    def url_for(route, filename):
+        parameters = {}
+        if "static" == route and app["config"]["DEBUG"]:
+            parameters["hash"] = static_file_hash(os.path.join(static_folder, filename))
+
+        return app.router[route].url(filename=filename, query=parameters)
+
+    def static_file_hash(filename):
+        return int(os.stat(filename).st_mtime)
+
+    jinja2_env.globals['url_for'] = url_for
+
+init_jinja2()
 app.add_hook("before_first_request", init)
 
 
@@ -105,9 +107,6 @@ def get_aliases(request):
         })
 
     return web.Response(text=json.dumps(results))
-
-def alias_to_view(alias):
-    return alias
 
 @asyncio.coroutine
 @addon.require_jwt()
