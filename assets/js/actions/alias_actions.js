@@ -9,7 +9,7 @@ var AliasActions = {
   fetchAliases: function() {
     let baseUrl = AppStore.get("base_url");
     $.ajax({
-      url: baseUrl + "/aliases",
+      url: baseUrl + "/alias",
       type: "GET",
       dataType: "json"
     }).done(function(data) {

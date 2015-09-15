@@ -16,8 +16,10 @@ FROM_NAME = "Alias"
 PARTICIPANTS_CACHE_KEY = "hipchat-participants:{group_id}:{room_id}"
 
 log = logging.getLogger(__name__)
-app, addon = create_addon_app(plugin_key="hc-alias-test",
+app, addon = create_addon_app(addon_key="hc-alias",
                        addon_name="HC Alias",
+                       vendor_name="Atlassian",
+                       vendor_url="https://atlassian.com",
                        from_name=FROM_NAME,
                        scopes=SCOPES_V2)
 
@@ -52,77 +54,22 @@ def init(app):
 
 app.add_hook("before_first_request", init)
 
-@asyncio.coroutine
-def capabilities(request):
-    config = request.app["config"]
-    base_url = config["BASE_URL"]
-    return web.Response(text=json.dumps({
-        "links": {
-            "self": base_url,
-            "homepage": base_url
-        },
-        "key": config.get("PLUGIN_KEY"),
-        "name": config.get("ADDON_NAME"),
-        "description": "HipChat connect add-on that sends supports aliases for group mention",
-        "vendor": {
-            "name": "Atlassian Labs",
-            "url": "https://atlassian.com"
-        },
-        "capabilities": {
-            "installable": {
-                "allowGlobal": False,
-                "allowRoom": True,
-                "callbackUrl": base_url + "/installable"
-            },
-            "hipchatApiConsumer": {
-                "scopes": SCOPES_V2,
-                "fromName": FROM_NAME
-            },
-            "configurable": {
-                "url":  base_url + "/config"
-            },
-            "webhook": [
-                {
-                    "url": base_url + "/alias",
-                    "event": "room_message",
-                    "pattern": "^/alias(\s|$).*"
-                }
-            ],
-            "action": [
-                {
-                    "key": "alias.input.action",
-                    "name": {
-                        "value": "Find an alias"
-                    },
-                    "target": {
-                        "type": "dialog",
-                        "key": "alias.dialog"
-                    },
-                    "location": "hipchat.input.action",
-                    "url": base_url + "/dialog"
-                }
-            ],
-            "webPanel": [
-                {
-                    "key": "alias.dialog",
-                    "name": {
-                        "value": "Choose alias"
-                    },
-                    "target": {
-                        "type": "dialog",
-                        "title": "Choose alias",
-                        "hint": "",
-                        "button": "Done"
-                    },
-                    "location": "hipchat.sidebar.right",
-                    "url": base_url + "/dialog"
-                }
-            ]
-        }
-    }))
 
+addon.add_action_capability({
+    "key": "alias.input.action",
+    "name": {
+        "value": "Find an alias"
+    },
+    "target": {
+        "type": "dialog",
+        "key": "alias.dialog"
+    },
+    "location": "hipchat.input.action",
+    "url": app["config"]["BASE_URL"] + "/dialog"
+})
 
 @asyncio.coroutine
+@addon.webhook("room_message", path="/alias", pattern="^/alias(\s|$).*", auth=None)
 def alias(request):
     addon = request.app['addon']
     body = yield from request.json()
@@ -137,35 +84,7 @@ def alias(request):
 
 
 @asyncio.coroutine
-def mention(request):
-    alias_name = request.match_info['alias_name']
-
-    addon = request.app['addon']
-    body = yield from request.json()
-    client_id = body['oauth_client_id']
-    client = yield from addon.load_client(client_id)
-
-    existing = yield from alias_controller.find_alias(client, alias_name)
-    if existing:
-        mentions = existing['mentions']
-
-        txt = "said: {original} /cc {mentions}".format(
-            original=body['item']["message"]["message"],
-            mentions=" ".join(mentions))
-        from_mention = body['item']['message']['from']['mention_name']
-        yield from client.room_client.send_notification(from_mention=from_mention, text=txt)
-
-        return web.HTTPNoContent()
-    else:
-        log.error("Mention name '%s' not found for client %s" % (alias_name, client_id))
-        return web.HTTPBadRequest()
-
-@asyncio.coroutine
-def config(request):
-    return web.Response(text="Awesome config")
-
-@asyncio.coroutine
-@addon.require_jwt()
+@addon.webpanel("alias.dialog", "Choose alias", location="hipchat.sidebar.right", path="/dialog")
 @aiohttp_jinja2.template('dialog.jinja2')
 def dialog(request):
 
@@ -218,6 +137,30 @@ def edit_alias(request):
     yield from alias_controller.edit_alias(client, alias_name, body["mentions"])
 
     return web.HTTPOk()
+
+@asyncio.coroutine
+def mention(request):
+    alias_name = request.match_info['alias_name']
+
+    addon = request.app['addon']
+    body = yield from request.json()
+    client_id = body['oauth_client_id']
+    client = yield from addon.load_client(client_id)
+
+    existing = yield from alias_controller.find_alias(client, alias_name)
+    if existing:
+        mentions = existing['mentions']
+
+        txt = "said: {original} /cc {mentions}".format(
+            original=body['item']["message"]["message"],
+            mentions=" ".join(mentions))
+        from_mention = body['item']['message']['from']['mention_name']
+        yield from client.room_client.send_notification(from_mention=from_mention, text=txt)
+
+        return web.HTTPNoContent()
+    else:
+        log.error("Mention name '%s' not found for client %s" % (alias_name, client_id))
+        return web.HTTPBadRequest()
 
 @asyncio.coroutine
 @addon.require_jwt()
@@ -342,17 +285,9 @@ def validate_mention_name(mention_name: str):
     if ' ' in name:
         raise ValueError("The mention name cannot contain multiple words")
 
-
-def _aliases_db(app):
-    return app['mongodb'].default_database['aliases']
-
-app.router.add_route('GET', '/', capabilities)
-app.router.add_route('POST', '/alias', alias)
-app.router.add_route('DELETE', '/alias/{alias_name}', delete_alias)
 app.router.add_route('POST', '/alias/{alias_name}', add_alias)
 app.router.add_route('PUT', '/alias/{alias_name}', edit_alias)
+app.router.add_route('DELETE', '/alias/{alias_name}', delete_alias)
+app.router.add_route('GET', '/alias', get_aliases)
 app.router.add_route('POST', '/mention/{alias_name}', mention)
-app.router.add_route('GET', '/dialog', dialog)
-app.router.add_route('GET', '/config', config)
-app.router.add_route('GET', '/aliases', get_aliases)
 app.router.add_route('GET', '/room_participants', get_room_participants)

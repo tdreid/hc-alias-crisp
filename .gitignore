@@ -14,5 +14,5 @@ venv
 build
 dist
 *.egg-info
-assets/bundles/
+assets
 webpack-stats.json
