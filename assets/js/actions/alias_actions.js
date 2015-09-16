@@ -41,9 +41,7 @@ var AliasActions = {
 
     AP.require(["chat", "dialog"], function(chat, dialog) {
       chat.appendMessage(mentionsText);
-      dialog.close({
-        key: "alias.dialog"
-      });
+      dialog.close();
     });
   },
 

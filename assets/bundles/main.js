@@ -1,7 +1,3065 @@
-!function(e){function t(i){if(s[i])return s[i].exports;var n=s[i]={exports:{},id:i,loaded:!1};return e[i].call(n.exports,n,n.exports,t),n.loaded=!0,n.exports}var s={};return t.m=e,t.c=s,t.p="",t(0)}([function(e,t,s){s(2),e.exports=s(28)},,function(e,t,s){"use strict";var i=s(3),n=s(4),o=s(10),a=s(14),r=a("meta[name=acpt]").attr("content");a.ajaxSetup({beforeSend:function(e){e.setRequestHeader("X-acpt",r)}});var l=a("meta[name=base-url]").attr("content");o.set("base_url",l),i.render(i.createElement(n,null),document.getElementById("react-app"))},function(e,t){e.exports=React},function(e,t,s){"use strict";var i=s(3),n=s(5),o=s(16),a=s(17),r=s(24),l=s(26),p=s(13);e.exports=i.createClass({displayName:"HipChatAliasApp",propTypes:{aliases:i.PropTypes.arrayOf(i.PropTypes.shape({alias:i.PropTypes.string.isRequired,mentions:i.PropTypes.arrayOf(i.PropTypes.string).isRequired})).isRequired},getInitialState:function(){return this._getState()},componentDidMount:function(){o.on("change",this._onChange),n.fetchAliases()},componentWillUnmount:function(){o.off("change",this._onChange)},_onChange:function(){this.setState(this._getState())},_getState:function(){return{aliases:o.get("aliases"),adding_alias:o.get("adding_alias"),loading:o.get("loading")}},_renderAlias:function(e){return i.createElement(a,{alias:e.alias,mentions:e.mentions})},_renderAliases:function(){return p.map(this.state.aliases,this._renderAlias)},_renderAddNew:function(){return i.createElement(r,null)},_configureNewAlias:function(){n.configureNewAlias()},render:function(){return this.state.loading?i.createElement("div",{className:"dialog"},i.createElement(l,{size:"medium",spin:!0})):this.state.adding_alias||0===this.state.aliases.length?this._renderAddNew():i.createElement("div",{className:"dialog"},i.createElement("table",{className:"aui aui-table-interactive aliases-container"},i.createElement("tbody",{className:"aliases"},this._renderAliases())),i.createElement("div",null,i.createElement("a",{className:"aui-button aui-button-link",onClick:this._configureNewAlias},"Configure a new alias")))}})},function(e,t,s){"use strict";var i=s(6),n=s(10),o=s(14),a=s(15),r=s(13),l={fetchAliases:function(){var e=n.get("base_url");o.ajax({url:e+"/alias",type:"GET",dataType:"json"}).done(function(e){i.dispatch({type:"aliases-fetched",payload:e})})},deleteAlias:function(e){var t=n.get("base_url");o.ajax({url:t+"/alias/"+e,type:"DELETE"}).done(function(){i.dispatch({type:"alias-deleted",alias:e})})},appendAliasToChat:function(e){var t=e.alias+": ";r.each(e.mentions,function(e){t+=e+" "}),a.require(["chat","dialog"],function(e,s){e.appendMessage(t),s.close({key:"alias.dialog"})})},getUsers:function(e,t){var s=n.get("base_url");o.ajax({url:s+"/room_participants",type:"GET",dataType:"json"}).done(function(e){var s=r.map(e,function(e){return{value:"@"+e.mention_name,label:"@"+e.mention_name}});t(null,{options:s,complete:!0})})},updateMentions:function(e,t){var s=n.get("base_url");o.ajax({url:s+"/alias/"+e,type:"PUT",contentType:"application/json",data:JSON.stringify({mentions:t})}).done(function(){i.dispatch({type:"alias-updated",payload:{alias:e,mentions:t}})})},saveAlias:function(e,t){var s=n.get("base_url");o.ajax({url:s+"/alias/"+e,type:"POST",contentType:"application/json",data:JSON.stringify({mentions:t}),dataType:"json"}).done(function(e){i.dispatch({type:"alias-saved",payload:e})})},configureNewAlias:function(){i.dispatch({type:"configure-new-alias"})}};e.exports=l},function(e,t,s){"use strict";var i=s(7).Dispatcher;e.exports=new i},function(e,t,s){e.exports.Dispatcher=s(8)},function(e,t,s){"use strict";function i(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}t.__esModule=!0;var n=s(9),o="ID_",a=function(){function e(){i(this,e),this._callbacks={},this._isDispatching=!1,this._isHandled={},this._isPending={},this._lastID=1}return e.prototype.register=function(e){var t=o+this._lastID++;return this._callbacks[t]=e,t},e.prototype.unregister=function(e){this._callbacks[e]?void 0:n(!1),delete this._callbacks[e]},e.prototype.waitFor=function(e){this._isDispatching?void 0:n(!1);for(var t=0;t<e.length;t++){var s=e[t];this._isPending[s]?this._isHandled[s]?void 0:n(!1):(this._callbacks[s]?void 0:n(!1),this._invokeCallback(s))}},e.prototype.dispatch=function(e){this._isDispatching?n(!1):void 0,this._startDispatching(e);try{for(var t in this._callbacks)this._isPending[t]||this._invokeCallback(t)}finally{this._stopDispatching()}},e.prototype.isDispatching=function(){return this._isDispatching},e.prototype._invokeCallback=function(e){this._isPending[e]=!0,this._callbacks[e](this._pendingPayload),this._isHandled[e]=!0},e.prototype._startDispatching=function(e){for(var t in this._callbacks)this._isPending[t]=!1,this._isHandled[t]=!1;this._pendingPayload=e,this._isDispatching=!0},e.prototype._stopDispatching=function(){delete this._pendingPayload,this._isDispatching=!1},e}();e.exports=a},function(e,t,s){"use strict";var i=function(e,t,s,i,n,o,a,r){if(!e){var l;if(void 0===t)l=new Error("Minified exception occurred; use the non-minified dev environment for the full error message and additional helpful warnings.");else{var p=[s,i,n,o,a,r],u=0;l=new Error("Invariant Violation: "+t.replace(/%s/g,function(){return p[u++]}))}throw l.framesToPop=1,l}};e.exports=i},function(e,t,s){"use strict";function i(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}function n(e,t){if("function"!=typeof t&&null!==t)throw new TypeError("Super expression must either be null or a function, not "+typeof t);e.prototype=Object.create(t&&t.prototype,{constructor:{value:e,enumerable:!1,writable:!0,configurable:!0}}),t&&(Object.setPrototypeOf?Object.setPrototypeOf(e,t):e.__proto__=t)}var o=function(){function e(e,t){for(var s=0;s<t.length;s++){var i=t[s];i.enumerable=i.enumerable||!1,i.configurable=!0,"value"in i&&(i.writable=!0),Object.defineProperty(e,i.key,i)}}return function(t,s,i){return s&&e(t.prototype,s),i&&e(t,i),t}}(),a=function(e,t,s){for(var i=!0;i;){var n=e,o=t,a=s;r=p=l=void 0,i=!1,null===n&&(n=Function.prototype);var r=Object.getOwnPropertyDescriptor(n,o);if(void 0!==r){if("value"in r)return r.value;var l=r.get;return void 0===l?void 0:l.call(a)}var p=Object.getPrototypeOf(n);if(null===p)return void 0;e=p,t=o,s=a,i=!0}},r=s(11),l=function(e){function t(){i(this,t),a(Object.getPrototypeOf(t.prototype),"constructor",this).apply(this,arguments)}return n(t,e),o(t,[{key:"getDefaults",value:function(){return{base_url:""}}}]),t}(r);e.exports=new l},function(e,t,s){"use strict";function i(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}function n(e,t){if("function"!=typeof t&&null!==t)throw new TypeError("Super expression must either be null or a function, not "+typeof t);e.prototype=Object.create(t&&t.prototype,{constructor:{value:e,enumerable:!1,writable:!0,configurable:!0}}),t&&(Object.setPrototypeOf?Object.setPrototypeOf(e,t):e.__proto__=t)}function o(e){return p.isArray(e)?e:[e]}var a=function(){function e(e,t){for(var s=0;s<t.length;s++){var i=t[s];i.enumerable=i.enumerable||!1,i.configurable=!0,"value"in i&&(i.writable=!0),Object.defineProperty(e,i.key,i)}}return function(t,s,i){return s&&e(t.prototype,s),i&&e(t,i),t}}(),r=function(e,t,s){for(var i=!0;i;){var n=e,o=t,a=s;r=p=l=void 0,i=!1,null===n&&(n=Function.prototype);var r=Object.getOwnPropertyDescriptor(n,o);if(void 0!==r){if("value"in r)return r.value;var l=r.get;return void 0===l?void 0:l.call(a)}var p=Object.getPrototypeOf(n);if(null===p)return void 0;e=p,t=o,s=a,i=!0}},l=s(12).EventEmitter,p=s(13),u=function(e){function t(){i(this,t),r(Object.getPrototypeOf(t.prototype),"constructor",this).call(this),this.data=this.getDefaults(),this.registerListeners()}return n(t,e),a(t,[{key:"has",value:function(e){return this.data.hasOwnProperty(e)}},{key:"get",value:function(e){return this.data[e]}},{key:"getAll",value:function(){return this.data}},{key:"setIfNotEqual",value:function(e,t){var s=e;void 0!==t&&(s={},s[e]=t),this.doSet(s,!0)}},{key:"set",value:function(e,t){var s=e;void 0!==t&&(s={},s[e]=t),this.doSet(s,!1)}},{key:"doSet",value:function(e,t){var s={},i=!1;p.keys(e).forEach(function(n){var o=!t||t&&!p.isEqual(e[n],this.data[n]);if(o){i=!0;var a=this.get(n),r=e[n];this.data[n]=r,s[n]=r,this.emit("change:"+n,r,a)}},this),(!t||t&&i)&&this.emit("change",s)}},{key:"unset",value:function(e){if(this.has(e)){var t=this.get(e);delete this.data[e],this.emit("change:"+e,void 0,t)}}},{key:"clear",value:function(){var e={};p.keys(this.data).forEach(function(t){e[t]=this.get(t),this.unset(t)},this),this.emit("change",e)}},{key:"registerListeners",value:function(){}},{key:"getDefaults",value:function(){return{}}},{key:"reset",value:function(){this.data=this.getDefaults()}},{key:"on",value:function(e,s){var i=this;o(e).forEach(function(e){return r(Object.getPrototypeOf(t.prototype),"on",i).call(i,e,s)})}},{key:"once",value:function(e,s){var i=this;o(e).forEach(function(e){return r(Object.getPrototypeOf(t.prototype),"once",i).call(i,e,s)})}},{key:"off",value:function(e,s){var i=this;o(e).forEach(function(e){return r(Object.getPrototypeOf(t.prototype),"removeListener",i).call(i,e,s)})}}]),t}(l);e.exports=u},function(e,t){function s(){this._events=this._events||{},this._maxListeners=this._maxListeners||void 0}function i(e){return"function"==typeof e}function n(e){return"number"==typeof e}function o(e){return"object"==typeof e&&null!==e}function a(e){return void 0===e}e.exports=s,s.EventEmitter=s,s.prototype._events=void 0,s.prototype._maxListeners=void 0,s.defaultMaxListeners=10,s.prototype.setMaxListeners=function(e){if(!n(e)||0>e||isNaN(e))throw TypeError("n must be a positive number");return this._maxListeners=e,this},s.prototype.emit=function(e){var t,s,n,r,l,p;if(this._events||(this._events={}),"error"===e&&(!this._events.error||o(this._events.error)&&!this._events.error.length)){if(t=arguments[1],t instanceof Error)throw t;throw TypeError('Uncaught, unspecified "error" event.')}if(s=this._events[e],a(s))return!1;if(i(s))switch(arguments.length){case 1:s.call(this);break;case 2:s.call(this,arguments[1]);break;case 3:s.call(this,arguments[1],arguments[2]);break;default:for(n=arguments.length,r=new Array(n-1),l=1;n>l;l++)r[l-1]=arguments[l];s.apply(this,r)}else if(o(s)){for(n=arguments.length,r=new Array(n-1),l=1;n>l;l++)r[l-1]=arguments[l];for(p=s.slice(),n=p.length,l=0;n>l;l++)p[l].apply(this,r)}return!0},s.prototype.addListener=function(e,t){var n;if(!i(t))throw TypeError("listener must be a function");if(this._events||(this._events={}),this._events.newListener&&this.emit("newListener",e,i(t.listener)?t.listener:t),this._events[e]?o(this._events[e])?this._events[e].push(t):this._events[e]=[this._events[e],t]:this._events[e]=t,o(this._events[e])&&!this._events[e].warned){var n;n=a(this._maxListeners)?s.defaultMaxListeners:this._maxListeners,n&&n>0&&this._events[e].length>n&&(this._events[e].warned=!0,console.error("(node) warning: possible EventEmitter memory leak detected. %d listeners added. Use emitter.setMaxListeners() to increase limit.",this._events[e].length),"function"==typeof console.trace&&console.trace())}return this},s.prototype.on=s.prototype.addListener,s.prototype.once=function(e,t){function s(){this.removeListener(e,s),n||(n=!0,t.apply(this,arguments))}if(!i(t))throw TypeError("listener must be a function");var n=!1;return s.listener=t,this.on(e,s),this},s.prototype.removeListener=function(e,t){var s,n,a,r;if(!i(t))throw TypeError("listener must be a function");if(!this._events||!this._events[e])return this;if(s=this._events[e],a=s.length,n=-1,s===t||i(s.listener)&&s.listener===t)delete this._events[e],this._events.removeListener&&this.emit("removeListener",e,t);else if(o(s)){for(r=a;r-->0;)if(s[r]===t||s[r].listener&&s[r].listener===t){n=r;break}if(0>n)return this;1===s.length?(s.length=0,delete this._events[e]):s.splice(n,1),this._events.removeListener&&this.emit("removeListener",e,t)}return this},s.prototype.removeAllListeners=function(e){var t,s;if(!this._events)return this;if(!this._events.removeListener)return 0===arguments.length?this._events={}:this._events[e]&&delete this._events[e],this;if(0===arguments.length){for(t in this._events)"removeListener"!==t&&this.removeAllListeners(t);return this.removeAllListeners("removeListener"),this._events={},this}if(s=this._events[e],i(s))this.removeListener(e,s);else for(;s.length;)this.removeListener(e,s[s.length-1]);return delete this._events[e],this},s.prototype.listeners=function(e){var t;return t=this._events&&this._events[e]?i(this._events[e])?[this._events[e]]:this._events[e].slice():[]},s.listenerCount=function(e,t){var s;return s=e._events&&e._events[t]?i(e._events[t])?1:e._events[t].length:0}},function(e,t){e.exports=_},function(e,t){e.exports=$},function(e,t){e.exports=AP},function(e,t,s){"use strict";function i(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}function n(e,t){if("function"!=typeof t&&null!==t)throw new TypeError("Super expression must either be null or a function, not "+typeof t);e.prototype=Object.create(t&&t.prototype,{constructor:{value:e,enumerable:!1,writable:!0,configurable:!0}}),t&&(Object.setPrototypeOf?Object.setPrototypeOf(e,t):e.__proto__=t)}var o=function(){function e(e,t){for(var s=0;s<t.length;s++){var i=t[s];i.enumerable=i.enumerable||!1,i.configurable=!0,"value"in i&&(i.writable=!0),Object.defineProperty(e,i.key,i)}}return function(t,s,i){return s&&e(t.prototype,s),i&&e(t,i),t}}(),a=function(e,t,s){for(var i=!0;i;){var n=e,o=t,a=s;r=p=l=void 0,i=!1,null===n&&(n=Function.prototype);var r=Object.getOwnPropertyDescriptor(n,o);if(void 0!==r){if("value"in r)return r.value;var l=r.get;return void 0===l?void 0:l.call(a)}var p=Object.getPrototypeOf(n);if(null===p)return void 0;e=p,t=o,s=a,i=!0}},r=s(11),l=s(6),p=s(13),u=function(e){function t(){i(this,t),a(Object.getPrototypeOf(t.prototype),"constructor",this).apply(this,arguments)}return n(t,e),o(t,[{key:"getDefaults",value:function(){return{aliases:[],adding_alias:!1,loading:!0}}},{key:"registerListeners",value:function(){var e=this;this.dispatchToken=l.register(function(t){switch(t.type){case"aliases-fetched":e.set({aliases:t.payload,loading:!1});break;case"alias-deleted":var s=p.filter(e.data.aliases,function(e){return e.alias!==t.alias});e.set("aliases",s);break;case"alias-updated":var i=p.find(e.data.aliases,function(e){return e.alias===t.payload.alias});i.mentions=t.payload.mentions,e.set("aliases",e.data.aliases);break;case"alias-saved":e.set({aliases:t.payload,adding_alias:!1});break;case"configure-new-alias":e.set({adding_alias:!0})}})}}]),t}(r);e.exports=new u},function(e,t,s){"use strict";var i=s(3),n=s(5),o=(s(16),s(13)),a=s(18);e.exports=i.createClass({displayName:"Alias",propTypes:{alias:i.PropTypes.string.isRequired,mentions:i.PropTypes.arrayOf(i.PropTypes.string).isRequired},getInitialState:function(){return{edit:!1,edited_mentions:null}},componentDidMount:function(){},_onChange:function(){this.setState(this._getState())},_getState:function(){return{}},_delete:function(e){n.deleteAlias(this.props.alias),e.stopPropagation()},_select:function(){n.appendAliasToChat({alias:this.props.alias,mentions:this.props.mentions})},_edit:function(e){this.setState({edit:!0}),e.stopPropagation()},_renderEdit:function(){var e=this.state.edited_mentions||this.props.mentions,t=e.join(",");return i.createElement("tr",{className:"alias edit","data-alias":this.props.alias,key:this.props.alias},i.createElement("td",{className:"name"},i.createElement("span",{className:"hc-mention hc-mention-me"},this.props.alias)),i.createElement("td",{className:"mentions"},i.createElement(a,{multi:!0,allowCreate:!0,value:t,delimitier:",",asyncOptions:this._getSelectOptions,onChange:this._onMentionsChange})),i.createElement("td",{className:"actions aui-compact-button-column"},i.createElement("a",{className:"aui-icon aui-icon-small aui-iconfont-success save",onClick:this._saveEdit},"Edit"),i.createElement("a",{className:"aui-icon aui-icon-small aui-iconfont-undo cancel",onClick:this._cancelEdit},"Delete")))},_getSelectOptions:function(e,t){n.getUsers(e,t)},_saveEdit:function(){n.updateMentions(this.props.alias,this.state.edited_mentions||this.props.mentions),this.setState({edit:!1})},_cancelEdit:function(){this.setState({edit:!1})},_onMentionsChange:function(e){var t=e.split(",");this.setState({edited_mentions:t})},render:function(){if(this.state.edit)return this._renderEdit();var e=o.map(this.props.mentions,function(e){return i.createElement("span",{className:"hc-mention"},{mention:e})});return i.createElement("tr",{className:"alias","data-alias":this.props.alias,key:this.props.alias,onClick:this._select},i.createElement("td",{className:"name"},i.createElement("span",{className:"hc-mention hc-mention-me"},this.props.alias)),i.createElement("td",{className:"mentions"},e),i.createElement("td",{className:"actions aui-compact-button-column"},i.createElement("a",{className:"aui-icon aui-icon-small aui-iconfont-edit edit",onClick:this._edit},"Edit"),i.createElement("a",{className:"aui-icon aui-icon-small aui-iconfont-delete delete",onClick:this._delete},"Delete")))}})},function(e,t,s){"use strict";var i=Object.assign||function(e){for(var t=1;t<arguments.length;t++){var s=arguments[t];for(var i in s)Object.prototype.hasOwnProperty.call(s,i)&&(e[i]=s[i])}return e},n=s(3),o=s(19),a=s(20),r=s(21),l=s(22),p=s(23),u=0,c=n.createClass({displayName:"Select",propTypes:{addLabelText:n.PropTypes.string,allowCreate:n.PropTypes.bool,asyncOptions:n.PropTypes.func,autoload:n.PropTypes.bool,backspaceRemoves:n.PropTypes.bool,cacheAsyncResults:n.PropTypes.bool,className:n.PropTypes.string,clearAllText:n.PropTypes.string,clearValueText:n.PropTypes.string,clearable:n.PropTypes.bool,delimiter:n.PropTypes.string,disabled:n.PropTypes.bool,filterOption:n.PropTypes.func,filterOptions:n.PropTypes.func,ignoreCase:n.PropTypes.bool,inputProps:n.PropTypes.object,matchPos:n.PropTypes.string,matchProp:n.PropTypes.string,multi:n.PropTypes.bool,name:n.PropTypes.string,newOptionCreator:n.PropTypes.func,noResultsText:n.PropTypes.string,onBlur:n.PropTypes.func,onChange:n.PropTypes.func,onFocus:n.PropTypes.func,onOptionLabelClick:n.PropTypes.func,optionComponent:n.PropTypes.func,optionRenderer:n.PropTypes.func,options:n.PropTypes.array,placeholder:n.PropTypes.string,searchable:n.PropTypes.bool,searchingText:n.PropTypes.string,searchPromptText:n.PropTypes.string,singleValueComponent:n.PropTypes.func,value:n.PropTypes.any,valueComponent:n.PropTypes.func,valueRenderer:n.PropTypes.func},getDefaultProps:function(){return{addLabelText:'Add "{label}"?',allowCreate:!1,asyncOptions:void 0,autoload:!0,backspaceRemoves:!0,cacheAsyncResults:!0,className:void 0,clearAllText:"Clear all",clearValueText:"Clear value",clearable:!0,delimiter:",",disabled:!1,ignoreCase:!0,inputProps:{},matchPos:"any",matchProp:"any",name:void 0,newOptionCreator:void 0,noResultsText:"No results found",onChange:void 0,onOptionLabelClick:void 0,optionComponent:p,options:void 0,placeholder:"Select...",searchable:!0,searchingText:"Searching...",searchPromptText:"Type to search",singleValueComponent:l,value:void 0,valueComponent:r}},getInitialState:function(){return{isFocused:!1,isLoading:!1,isOpen:!1,options:this.props.options}},componentWillMount:function(){var e=this;this._optionsCache={},this._optionsFilterString="",this._closeMenuIfClickedOutside=function(t){if(e.state.isOpen){var s=n.findDOMNode(e.refs.selectMenuContainer),i=n.findDOMNode(e.refs.control),o=e.clickedOutsideElement(s,t),a=e.clickedOutsideElement(i,t);o&&a&&e.setState({isOpen:!1},e._unbindCloseMenuIfClickedOutside)}},this._bindCloseMenuIfClickedOutside=function(){!document.addEventListener&&document.attachEvent?document.attachEvent("onclick",this._closeMenuIfClickedOutside):document.addEventListener("click",this._closeMenuIfClickedOutside)},this._unbindCloseMenuIfClickedOutside=function(){!document.removeEventListener&&document.detachEvent?document.detachEvent("onclick",this._closeMenuIfClickedOutside):document.removeEventListener("click",this._closeMenuIfClickedOutside)},this.setState(this.getStateFromValue(this.props.value))},componentDidMount:function(){this.props.asyncOptions&&this.props.autoload&&this.autoloadAsyncOptions()},componentWillUnmount:function(){clearTimeout(this._blurTimeout),clearTimeout(this._focusTimeout),this.state.isOpen&&this._unbindCloseMenuIfClickedOutside()},componentWillReceiveProps:function(e){var t=this,s=!1;if(JSON.stringify(e.options)!==JSON.stringify(this.props.options)&&(s=!0,this.setState({options:e.options,filteredOptions:this.filterOptions(e.options)})),e.value!==this.state.value||e.placeholder!==this.props.placeholder||s){var i=function(s){t.setState(t.getStateFromValue(e.value,s&&s.options||e.options,e.placeholder))};this.props.asyncOptions?this.loadAsyncOptions(e.value,{},i):i()}},componentDidUpdate:function(){var e=this;if(!this.props.disabled&&this._focusAfterUpdate&&(clearTimeout(this._blurTimeout),this._focusTimeout=setTimeout(function(){e.getInputNode().focus(),e._focusAfterUpdate=!1},50)),this._focusedOptionReveal){if(this.refs.focused&&this.refs.menu){var t=n.findDOMNode(this.refs.focused),s=n.findDOMNode(this.refs.menu),i=t.getBoundingClientRect(),o=s.getBoundingClientRect();(i.bottom>o.bottom||i.top<o.top)&&(s.scrollTop=t.offsetTop+t.clientHeight-s.offsetHeight)}this._focusedOptionReveal=!1}},focus:function(){this.getInputNode().focus()},clickedOutsideElement:function(e,t){for(var s=t.target?t.target:t.srcElement;null!=s;){if(s===e)return!1;s=s.offsetParent}return!0},getStateFromValue:function(e,t,s){t||(t=this.state.options),s||(s=this.props.placeholder),this._optionsFilterString="";var i,n=this.initValuesArray(e,t),o=this.filterOptions(t,n),a=null;return!this.props.multi&&n.length?(i=n[0],a=n[0].value):(i=this.getFirstFocusableOption(o),a=n.map(function(e){return e.value}).join(this.props.delimiter)),{value:a,values:n,inputValue:"",filteredOptions:o,placeholder:!this.props.multi&&n.length?n[0].label:s,focusedOption:i}},getFirstFocusableOption:function(e){for(var t=0;t<e.length;++t)if(!e[t].disabled)return e[t]},initValuesArray:function(e,t){return Array.isArray(e)||(e="string"==typeof e?""===e?[]:e.split(this.props.delimiter):void 0!==e&&null!==e?[e]:[]),e.map(function(e){if("string"==typeof e||"number"==typeof e){for(var s in t)if(t.hasOwnProperty(s)&&t[s]&&(t[s].value===e||"number"==typeof t[s].value&&t[s].value.toString()===e))return t[s];return{value:e,label:e}}return e})},setValue:function(e,t){(t||void 0===t)&&(this._focusAfterUpdate=!0);var s=this.getStateFromValue(e);s.isOpen=!1,this.fireChangeEvent(s),this.setState(s)},selectValue:function(e){this.props.multi?e&&this.addValue(e):this.setValue(e),this._unbindCloseMenuIfClickedOutside()},addValue:function(e){this.setValue(this.state.values.concat(e))},popValue:function(){this.setValue(this.state.values.slice(0,this.state.values.length-1))},removeValue:function(e){this.setValue(this.state.values.filter(function(t){return t!==e}))},clearValue:function(e){e&&"mousedown"===e.type&&0!==e.button||(e.stopPropagation(),e.preventDefault(),this.setValue(null))},resetValue:function(){this.setValue(""===this.state.value?null:this.state.value)},getInputNode:function(){var e=this.refs.input;return this.props.searchable?e:n.findDOMNode(e)},fireChangeEvent:function(e){e.value!==this.state.value&&this.props.onChange&&this.props.onChange(e.value,e.values)},handleMouseDown:function(e){return this.props.disabled||"mousedown"===e.type&&0!==e.button?void 0:(e.stopPropagation(),e.preventDefault(),this.state.isOpen&&!this.props.searchable?void this.setState({isOpen:!1},this._unbindCloseMenuIfClickedOutside):void(this.state.isFocused?this.setState({isOpen:!0},this._bindCloseMenuIfClickedOutside):(this._openAfterFocus=!0,this.getInputNode().focus())))},handleMouseDownOnArrow:function(e){this.props.disabled||"mousedown"===e.type&&0!==e.button||this.state.isOpen&&(e.stopPropagation(),e.preventDefault(),this.setState({isOpen:!1},this._unbindCloseMenuIfClickedOutside))},handleInputFocus:function(e){var t=this.state.isOpen||this._openAfterFocus;this.setState({isFocused:!0,isOpen:t},function(){t?this._bindCloseMenuIfClickedOutside():this._unbindCloseMenuIfClickedOutside()}),this._openAfterFocus=!1,this.props.onFocus&&this.props.onFocus(e)},handleInputBlur:function(e){var t=this;this._blurTimeout=setTimeout(function(){t._focusAfterUpdate||t.setState({isFocused:!1,isOpen:!1})},50),this.props.onBlur&&this.props.onBlur(e)},handleKeyDown:function(e){if(!this.props.disabled){switch(e.keyCode){case 8:return void(!this.state.inputValue&&this.props.backspaceRemoves&&this.popValue());case 9:if(e.shiftKey||!this.state.isOpen||!this.state.focusedOption)return;this.selectFocusedOption();break;case 13:if(!this.state.isOpen)return;this.selectFocusedOption();break;case 27:this.state.isOpen?this.resetValue():this.props.clearable&&this.clearValue(e);break;case 38:this.focusPreviousOption();break;case 40:this.focusNextOption();break;case 188:if(!this.props.allowCreate||!this.props.multi)return;e.preventDefault(),e.stopPropagation(),this.selectFocusedOption();break;default:return}e.preventDefault()}},_getNewFocusedOption:function(e){for(var t in e)if(e.hasOwnProperty(t)&&e[t]===this.state.focusedOption)return e[t];return this.getFirstFocusableOption(e)},handleInputChange:function(e){if(this._optionsFilterString=e.target.value,this.props.asyncOptions)this.setState({isLoading:!0,inputValue:e.target.value}),this.loadAsyncOptions(e.target.value,{isLoading:!1,isOpen:!0},this._bindCloseMenuIfClickedOutside);else{var t=this.filterOptions(this.state.options);this.setState({isOpen:!0,inputValue:e.target.value,filteredOptions:t,focusedOption:this._getNewFocusedOption(t)},this._bindCloseMenuIfClickedOutside)}},autoloadAsyncOptions:function(){var e=this;this.loadAsyncOptions(this.props.value||"",{},function(){e.setValue(e.props.value,!1)})},loadAsyncOptions:function(e,t,s){var i=this,n=this._currentRequestId=u++;if(this.props.cacheAsyncResults)for(var o=0;o<=e.length;o++){var a=e.slice(0,o);if(this._optionsCache[a]&&(e===a||this._optionsCache[a].complete)){var r=this._optionsCache[a].options,l=this.filterOptions(r),p={options:r,filteredOptions:l,focusedOption:this._getNewFocusedOption(l)};for(var c in t)t.hasOwnProperty(c)&&(p[c]=t[c]);return this.setState(p),void(s&&s.call(this,p))}}this.props.asyncOptions(e,function(o,a){if(o)throw o;if(i.props.cacheAsyncResults&&(i._optionsCache[e]=a),n===i._currentRequestId){var r=i.filterOptions(a.options),l={options:a.options,filteredOptions:r,focusedOption:i._getNewFocusedOption(r)};for(var p in t)t.hasOwnProperty(p)&&(l[p]=t[p]);i.setState(l),s&&s.call(i,l)}})},filterOptions:function(e,t){var s=this._optionsFilterString,i=(t||this.state.values).map(function(e){return e.value});if(this.props.filterOptions)return this.props.filterOptions.call(this,e,s,i);var n=function(e){if(this.props.multi&&i.indexOf(e.value)>-1)return!1;if(this.props.filterOption)return this.props.filterOption.call(this,e,s);var t=String(e.value),n=String(e.label);return this.props.ignoreCase&&(t=t.toLowerCase(),n=n.toLowerCase(),s=s.toLowerCase()),s&&"start"!==this.props.matchPos?"label"!==this.props.matchProp&&t.indexOf(s)>=0||"value"!==this.props.matchProp&&n.indexOf(s)>=0:"label"!==this.props.matchProp&&t.substr(0,s.length)===s||"value"!==this.props.matchProp&&n.substr(0,s.length)===s};return(e||[]).filter(n,this)},selectFocusedOption:function(){return this.props.allowCreate&&!this.state.focusedOption?this.selectValue(this.state.inputValue):this.state.focusedOption?this.selectValue(this.state.focusedOption):void 0},focusOption:function(e){this.setState({focusedOption:e})},focusNextOption:function(){this.focusAdjacentOption("next")},focusPreviousOption:function(){this.focusAdjacentOption("previous")},focusAdjacentOption:function(e){this._focusedOptionReveal=!0;var t=this.state.filteredOptions.filter(function(e){return!e.disabled});if(!this.state.isOpen)return void this.setState({isOpen:!0,inputValue:"",focusedOption:this.state.focusedOption||t["next"===e?0:t.length-1]},this._bindCloseMenuIfClickedOutside);if(t.length){for(var s=-1,i=0;i<t.length;i++)if(this.state.focusedOption===t[i]){s=i;break}var n=t[0];"next"===e&&s>-1&&s<t.length-1?n=t[s+1]:"previous"===e&&(n=s>0?t[s-1]:t[t.length-1]),this.setState({focusedOption:n})}},unfocusOption:function(e){this.state.focusedOption===e&&this.setState({focusedOption:null})},buildMenu:function(){var e=this.state.focusedOption?this.state.focusedOption.value:null,t=this.props.optionRenderer||function(e){return e.label};this.state.filteredOptions.length>0&&(e=null==e?this.state.filteredOptions[0]:e);var s=this.state.filteredOptions;if(this.props.allowCreate&&this.state.inputValue.trim()){var i=this.state.inputValue;s=s.slice();var o=this.props.newOptionCreator?this.props.newOptionCreator(i):{value:i,label:i,create:!0};s.unshift(o)}var r=Object.keys(s).map(function(i){var o=s[i],r=this.state.value===o.value,l=e===o.value,p=a({"Select-option":!0,"is-selected":r,"is-focused":l,"is-disabled":o.disabled}),u=l?"focused":null,c=this.focusOption.bind(this,o),h=this.unfocusOption.bind(this,o),d=this.selectValue.bind(this,o),f=n.createElement(this.props.optionComponent,{key:"option-"+o.value,className:p,renderFunc:t,mouseEnter:c,mouseLeave:h,mouseDown:d,click:d,addLabelText:this.props.addLabelText,option:o,ref:u});return f},this);if(r.length)return r;var l,p;return this.state.isLoading?(p="Select-searching",l=this.props.searchingText):this.state.inputValue||!this.props.asyncOptions?(p="Select-noresults",l=this.props.noResultsText):(p="Select-search-prompt",l=this.props.searchPromptText),n.createElement("div",{className:p},l)},handleOptionLabelClick:function(e,t){this.props.onOptionLabelClick&&this.props.onOptionLabelClick(e,t)},render:function(){var e=a("Select",this.props.className,{"is-multi":this.props.multi,"is-searchable":this.props.searchable,"is-open":this.state.isOpen,"is-focused":this.state.isFocused,"is-loading":this.state.isLoading,"is-disabled":this.props.disabled,"has-value":this.state.value}),t=[];if(this.props.multi&&this.state.values.forEach(function(e){var s=this.handleOptionLabelClick.bind(this,e),i=this.removeValue.bind(this,e),o=n.createElement(this.props.valueComponent,{key:e.value,option:e,renderer:this.props.valueRenderer,optionLabelClick:!!this.props.onOptionLabelClick,onOptionLabelClick:s,onRemove:i,disabled:this.props.disabled});t.push(o)},this),!(this.state.inputValue||this.props.multi&&t.length)){var s=this.state.values[0]||null;if(this.props.valueRenderer&&this.state.values.length)t.push(n.createElement(r,{key:0,option:s,renderer:this.props.valueRenderer,disabled:this.props.disabled}));else{var l=n.createElement(this.props.singleValueComponent,{key:"placeholder",value:s,placeholder:this.state.placeholder});t.push(l)}}var p,u,c=this.state.isLoading?n.createElement("span",{className:"Select-loading","aria-hidden":"true"}):null,h=this.props.clearable&&this.state.value&&!this.props.disabled?n.createElement("span",{className:"Select-clear",title:this.props.multi?this.props.clearAllText:this.props.clearValueText,"aria-label":this.props.multi?this.props.clearAllText:this.props.clearValueText,onMouseDown:this.clearValue,onClick:this.clearValue,dangerouslySetInnerHTML:{__html:"&times;"}}):null;this.state.isOpen&&(u={ref:"menu",className:"Select-menu",onMouseDown:this.handleMouseDown},p=n.createElement("div",{ref:"selectMenuContainer",className:"Select-menu-outer"},n.createElement("div",u,this.buildMenu())));var d,f={ref:"input",className:"Select-input "+(this.props.inputProps.className||""),tabIndex:this.props.tabIndex||0,onFocus:this.handleInputFocus,onBlur:this.handleInputBlur};for(var m in this.props.inputProps)this.props.inputProps.hasOwnProperty(m)&&"className"!==m&&(f[m]=this.props.inputProps[m]);return this.props.disabled?this.props.multi&&this.state.values.length||(d=n.createElement("div",{
-className:"Select-input"}," ")):d=this.props.searchable?n.createElement(o,i({value:this.state.inputValue,onChange:this.handleInputChange,minWidth:"5"},f)):n.createElement("div",f," "),n.createElement("div",{ref:"wrapper",className:e},n.createElement("input",{type:"hidden",ref:"value",name:this.props.name,value:this.state.value,disabled:this.props.disabled}),n.createElement("div",{className:"Select-control",ref:"control",onKeyDown:this.handleKeyDown,onMouseDown:this.handleMouseDown,onTouchEnd:this.handleMouseDown},t,d,n.createElement("span",{className:"Select-arrow-zone",onMouseDown:this.handleMouseDownOnArrow}),n.createElement("span",{className:"Select-arrow",onMouseDown:this.handleMouseDownOnArrow}),c,h),p)}});e.exports=c},function(e,t,s){"use strict";var i=Object.assign||function(e){for(var t=1;t<arguments.length;t++){var s=arguments[t];for(var i in s)Object.prototype.hasOwnProperty.call(s,i)&&(e[i]=s[i])}return e},n=s(3),o={position:"absolute",visibility:"hidden",height:0,width:0,overflow:"scroll",whiteSpace:"nowrap"},a=n.createClass({displayName:"AutosizeInput",propTypes:{value:n.PropTypes.any,defaultValue:n.PropTypes.any,onChange:n.PropTypes.func,style:n.PropTypes.object,className:n.PropTypes.string,minWidth:n.PropTypes.oneOfType([n.PropTypes.number,n.PropTypes.string]),inputStyle:n.PropTypes.object,inputClassName:n.PropTypes.string},getDefaultProps:function(){return{minWidth:1}},getInitialState:function(){return{inputWidth:this.props.minWidth}},componentDidMount:function(){this.copyInputStyles(),this.updateInputWidth()},componentDidUpdate:function(){this.updateInputWidth()},copyInputStyles:function(){if(this.isMounted()&&window.getComputedStyle){var e=window.getComputedStyle(n.findDOMNode(this.refs.input)),t=n.findDOMNode(this.refs.sizer);if(t.style.fontSize=e.fontSize,t.style.fontFamily=e.fontFamily,t.style.letterSpacing=e.letterSpacing,this.props.placeholder){var s=n.findDOMNode(this.refs.placeholderSizer);s.style.fontSize=e.fontSize,s.style.fontFamily=e.fontFamily,s.style.letterSpacing=e.letterSpacing}}},updateInputWidth:function(){if(this.isMounted()&&"undefined"!=typeof n.findDOMNode(this.refs.sizer).scrollWidth){var e;e=this.props.placeholder?Math.max(n.findDOMNode(this.refs.sizer).scrollWidth,n.findDOMNode(this.refs.placeholderSizer).scrollWidth)+2:n.findDOMNode(this.refs.sizer).scrollWidth+2,e<this.props.minWidth&&(e=this.props.minWidth),e!==this.state.inputWidth&&this.setState({inputWidth:e})}},getInput:function(){return this.refs.input},focus:function(){n.findDOMNode(this.refs.input).focus()},select:function(){n.findDOMNode(this.refs.input).select()},render:function(){var e=(this.props.value||"").replace(/\&/g,"&amp;").replace(/ /g,"&nbsp;").replace(/\</g,"&lt;").replace(/\>/g,"&gt;"),t=this.props.style||{};t.display="inline-block";var s=i({},this.props.inputStyle);s.width=this.state.inputWidth,s.boxSizing="content-box";var a=this.props.placeholder?n.createElement("div",{ref:"placeholderSizer",style:o},this.props.placeholder):null;return n.createElement("div",{className:this.props.className,style:t},n.createElement("input",i({},this.props,{ref:"input",className:this.props.inputClassName,style:s})),n.createElement("div",{ref:"sizer",style:o,dangerouslySetInnerHTML:{__html:e}}),a)}});e.exports=a},function(e,t,s){var i;/*!
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId])
+/******/ 			return installedModules[moduleId].exports;
+
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			exports: {},
+/******/ 			id: moduleId,
+/******/ 			loaded: false
+/******/ 		};
+
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+
+/******/ 		// Flag the module as loaded
+/******/ 		module.loaded = true;
+
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+
+
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(0);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ function(module, exports, __webpack_require__) {
+
+	__webpack_require__(2);
+	module.exports = __webpack_require__(29);
+
+
+/***/ },
+/* 1 */,
+/* 2 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(3),
+	    AliasApp = __webpack_require__(4),
+	    AppStore = __webpack_require__(11),
+	    $ = __webpack_require__(15);
+
+	var signedRequest = $("meta[name=acpt]").attr("content");
+	$.ajaxSetup({
+	  beforeSend: function beforeSend(request) {
+	    request.setRequestHeader("X-acpt", signedRequest);
+	  }
+	});
+
+	var baseUrl = $("meta[name=base-url]").attr("content");
+	AppStore.set("base_url", baseUrl);
+
+	React.render(React.createElement(AliasApp, null), document.getElementById('react-app'));
+
+/***/ },
+/* 3 */
+/***/ function(module, exports) {
+
+	module.exports = React;
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var React = __webpack_require__(3),
+	    AliasActions = __webpack_require__(5),
+	    AliasStore = __webpack_require__(17),
+	    Alias = __webpack_require__(18),
+	    AddAlias = __webpack_require__(25),
+	    Spinner = __webpack_require__(27),
+	    _ = __webpack_require__(14);
+
+	module.exports = React.createClass({
+
+	  displayName: "HipChatAliasApp",
+
+	  propTypes: {
+	    aliases: React.PropTypes.arrayOf(React.PropTypes.shape({
+	      alias: React.PropTypes.string.isRequired,
+	      mentions: React.PropTypes.arrayOf(React.PropTypes.string).isRequired
+	    })).isRequired
+	  },
+
+	  getInitialState: function getInitialState() {
+	    return this._getState();
+	  },
+
+	  componentDidMount: function componentDidMount() {
+	    AliasStore.on("change", this._onChange);
+	    AliasActions.fetchAliases();
+	  },
+
+	  componentWillUnmount: function componentWillUnmount() {
+	    AliasStore.off("change", this._onChange);
+	  },
+
+	  _onChange: function _onChange() {
+	    this.setState(this._getState());
+	  },
+
+	  _getState: function _getState() {
+	    return {
+	      aliases: AliasStore.get("aliases"),
+	      adding_alias: AliasStore.get("adding_alias"),
+	      loading: AliasStore.get("loading")
+	    };
+	  },
+
+	  _renderAlias: function _renderAlias(alias) {
+	    return React.createElement(Alias, { alias: alias.alias,
+	      mentions: alias.mentions });
+	  },
+
+	  _renderAliases: function _renderAliases() {
+	    return _.map(this.state.aliases, this._renderAlias);
+	  },
+
+	  _renderAddNew: function _renderAddNew() {
+	    return React.createElement(AddAlias, null);
+	  },
+
+	  _configureNewAlias: function _configureNewAlias() {
+	    AliasActions.configureNewAlias();
+	  },
+
+	  render: function render() {
+
+	    if (this.state.loading) {
+	      return React.createElement(
+	        "div",
+	        { className: "dialog" },
+	        React.createElement(Spinner, { size: "medium",
+	          spin: true })
+	      );
+	    }
+
+	    if (this.state.adding_alias || this.state.aliases.length === 0) {
+	      return this._renderAddNew();
+	    }
+
+	    return React.createElement(
+	      "div",
+	      { className: "dialog" },
+	      React.createElement(
+	        "table",
+	        { className: "aui aui-table-interactive aliases-container" },
+	        React.createElement(
+	          "tbody",
+	          { className: "aliases" },
+	          this._renderAliases()
+	        )
+	      ),
+	      React.createElement(
+	        "div",
+	        null,
+	        React.createElement(
+	          "a",
+	          { className: "aui-button aui-button-link", onClick: this._configureNewAlias },
+	          "Configure a new alias"
+	        )
+	      )
+	    );
+	  }
+	});
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var AppDispatcher = __webpack_require__(6),
+	    AppStore = __webpack_require__(11),
+	    $ = __webpack_require__(15),
+	    AP = __webpack_require__(16),
+	    _ = __webpack_require__(14);
+
+	var AliasActions = {
+
+	  fetchAliases: function fetchAliases() {
+	    var baseUrl = AppStore.get("base_url");
+	    $.ajax({
+	      url: baseUrl + "/alias",
+	      type: "GET",
+	      dataType: "json"
+	    }).done(function (data) {
+	      AppDispatcher.dispatch({
+	        type: "aliases-fetched",
+	        payload: data
+	      });
+	    });
+	  },
+
+	  deleteAlias: function deleteAlias(aliasName) {
+	    var baseUrl = AppStore.get("base_url");
+	    $.ajax({
+	      url: baseUrl + "/alias/" + aliasName,
+	      type: "DELETE"
+	    }).done(function () {
+	      AppDispatcher.dispatch({
+	        type: "alias-deleted",
+	        alias: aliasName
+	      });
+	    });
+	  },
+
+	  appendAliasToChat: function appendAliasToChat(alias) {
+	    var mentionsText = alias.alias + ": ";
+	    _.each(alias.mentions, function (mention) {
+	      mentionsText += mention + " ";
+	    });
+
+	    AP.require(["chat", "dialog"], function (chat, dialog) {
+	      chat.appendMessage(mentionsText);
+	      dialog.close();
+	    });
+	  },
+
+	  getUsers: function getUsers(input, callback) {
+	    var baseUrl = AppStore.get("base_url");
+	    $.ajax({
+	      url: baseUrl + "/room_participants",
+	      type: "GET",
+	      dataType: "json"
+	    }).done(function (users) {
+	      var options = _.map(users, function (user) {
+	        return {
+	          value: "@" + user.mention_name,
+	          label: "@" + user.mention_name
+	        };
+	      });
+
+	      callback(null, {
+	        options: options,
+	        complete: true
+	      });
+	    });
+	  },
+
+	  updateMentions: function updateMentions(aliasName, mentions) {
+	    var baseUrl = AppStore.get("base_url");
+	    $.ajax({
+	      url: baseUrl + "/alias/" + aliasName,
+	      type: "PUT",
+	      contentType: "application/json",
+	      data: JSON.stringify({
+	        mentions: mentions
+	      })
+	    }).done(function () {
+	      AppDispatcher.dispatch({
+	        type: "alias-updated",
+	        payload: {
+	          alias: aliasName,
+	          mentions: mentions
+	        }
+	      });
+	    });
+	  },
+
+	  saveAlias: function saveAlias(aliasName, mentions) {
+	    var baseUrl = AppStore.get("base_url");
+	    $.ajax({
+	      url: baseUrl + "/alias/" + aliasName,
+	      type: "POST",
+	      contentType: "application/json",
+	      data: JSON.stringify({
+	        mentions: mentions
+	      }),
+	      dataType: "json"
+	    }).done(function (data) {
+	      AppDispatcher.dispatch({
+	        type: "alias-saved",
+	        payload: data
+	      });
+	    });
+	  },
+
+	  configureNewAlias: function configureNewAlias() {
+	    AppDispatcher.dispatch({
+	      type: "configure-new-alias"
+	    });
+	  }
+	};
+
+	module.exports = AliasActions;
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var Dispatcher = __webpack_require__(7).Dispatcher;
+
+	module.exports = new Dispatcher();
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Copyright (c) 2014-2015, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 */
+
+	module.exports.Dispatcher = __webpack_require__(8);
+
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(process) {/**
+	 * Copyright (c) 2014-2015, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 *
+	 * @providesModule Dispatcher
+	 * 
+	 * @preventMunge
+	 */
+
+	'use strict';
+
+	exports.__esModule = true;
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+	var invariant = __webpack_require__(10);
+
+	var _prefix = 'ID_';
+
+	/**
+	 * Dispatcher is used to broadcast payloads to registered callbacks. This is
+	 * different from generic pub-sub systems in two ways:
+	 *
+	 *   1) Callbacks are not subscribed to particular events. Every payload is
+	 *      dispatched to every registered callback.
+	 *   2) Callbacks can be deferred in whole or part until other callbacks have
+	 *      been executed.
+	 *
+	 * For example, consider this hypothetical flight destination form, which
+	 * selects a default city when a country is selected:
+	 *
+	 *   var flightDispatcher = new Dispatcher();
+	 *
+	 *   // Keeps track of which country is selected
+	 *   var CountryStore = {country: null};
+	 *
+	 *   // Keeps track of which city is selected
+	 *   var CityStore = {city: null};
+	 *
+	 *   // Keeps track of the base flight price of the selected city
+	 *   var FlightPriceStore = {price: null}
+	 *
+	 * When a user changes the selected city, we dispatch the payload:
+	 *
+	 *   flightDispatcher.dispatch({
+	 *     actionType: 'city-update',
+	 *     selectedCity: 'paris'
+	 *   });
+	 *
+	 * This payload is digested by `CityStore`:
+	 *
+	 *   flightDispatcher.register(function(payload) {
+	 *     if (payload.actionType === 'city-update') {
+	 *       CityStore.city = payload.selectedCity;
+	 *     }
+	 *   });
+	 *
+	 * When the user selects a country, we dispatch the payload:
+	 *
+	 *   flightDispatcher.dispatch({
+	 *     actionType: 'country-update',
+	 *     selectedCountry: 'australia'
+	 *   });
+	 *
+	 * This payload is digested by both stores:
+	 *
+	 *   CountryStore.dispatchToken = flightDispatcher.register(function(payload) {
+	 *     if (payload.actionType === 'country-update') {
+	 *       CountryStore.country = payload.selectedCountry;
+	 *     }
+	 *   });
+	 *
+	 * When the callback to update `CountryStore` is registered, we save a reference
+	 * to the returned token. Using this token with `waitFor()`, we can guarantee
+	 * that `CountryStore` is updated before the callback that updates `CityStore`
+	 * needs to query its data.
+	 *
+	 *   CityStore.dispatchToken = flightDispatcher.register(function(payload) {
+	 *     if (payload.actionType === 'country-update') {
+	 *       // `CountryStore.country` may not be updated.
+	 *       flightDispatcher.waitFor([CountryStore.dispatchToken]);
+	 *       // `CountryStore.country` is now guaranteed to be updated.
+	 *
+	 *       // Select the default city for the new country
+	 *       CityStore.city = getDefaultCityForCountry(CountryStore.country);
+	 *     }
+	 *   });
+	 *
+	 * The usage of `waitFor()` can be chained, for example:
+	 *
+	 *   FlightPriceStore.dispatchToken =
+	 *     flightDispatcher.register(function(payload) {
+	 *       switch (payload.actionType) {
+	 *         case 'country-update':
+	 *         case 'city-update':
+	 *           flightDispatcher.waitFor([CityStore.dispatchToken]);
+	 *           FlightPriceStore.price =
+	 *             getFlightPriceStore(CountryStore.country, CityStore.city);
+	 *           break;
+	 *     }
+	 *   });
+	 *
+	 * The `country-update` payload will be guaranteed to invoke the stores'
+	 * registered callbacks in order: `CountryStore`, `CityStore`, then
+	 * `FlightPriceStore`.
+	 */
+
+	var Dispatcher = (function () {
+	  function Dispatcher() {
+	    _classCallCheck(this, Dispatcher);
+
+	    this._callbacks = {};
+	    this._isDispatching = false;
+	    this._isHandled = {};
+	    this._isPending = {};
+	    this._lastID = 1;
+	  }
+
+	  /**
+	   * Registers a callback to be invoked with every dispatched payload. Returns
+	   * a token that can be used with `waitFor()`.
+	   */
+
+	  Dispatcher.prototype.register = function register(callback) {
+	    var id = _prefix + this._lastID++;
+	    this._callbacks[id] = callback;
+	    return id;
+	  };
+
+	  /**
+	   * Removes a callback based on its token.
+	   */
+
+	  Dispatcher.prototype.unregister = function unregister(id) {
+	    !this._callbacks[id] ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.unregister(...): `%s` does not map to a registered callback.', id) : invariant(false) : undefined;
+	    delete this._callbacks[id];
+	  };
+
+	  /**
+	   * Waits for the callbacks specified to be invoked before continuing execution
+	   * of the current callback. This method should only be used by a callback in
+	   * response to a dispatched payload.
+	   */
+
+	  Dispatcher.prototype.waitFor = function waitFor(ids) {
+	    !this._isDispatching ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.waitFor(...): Must be invoked while dispatching.') : invariant(false) : undefined;
+	    for (var ii = 0; ii < ids.length; ii++) {
+	      var id = ids[ii];
+	      if (this._isPending[id]) {
+	        !this._isHandled[id] ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.waitFor(...): Circular dependency detected while ' + 'waiting for `%s`.', id) : invariant(false) : undefined;
+	        continue;
+	      }
+	      !this._callbacks[id] ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.waitFor(...): `%s` does not map to a registered callback.', id) : invariant(false) : undefined;
+	      this._invokeCallback(id);
+	    }
+	  };
+
+	  /**
+	   * Dispatches a payload to all registered callbacks.
+	   */
+
+	  Dispatcher.prototype.dispatch = function dispatch(payload) {
+	    !!this._isDispatching ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatch.dispatch(...): Cannot dispatch in the middle of a dispatch.') : invariant(false) : undefined;
+	    this._startDispatching(payload);
+	    try {
+	      for (var id in this._callbacks) {
+	        if (this._isPending[id]) {
+	          continue;
+	        }
+	        this._invokeCallback(id);
+	      }
+	    } finally {
+	      this._stopDispatching();
+	    }
+	  };
+
+	  /**
+	   * Is this Dispatcher currently dispatching.
+	   */
+
+	  Dispatcher.prototype.isDispatching = function isDispatching() {
+	    return this._isDispatching;
+	  };
+
+	  /**
+	   * Call the callback stored with the given id. Also do some internal
+	   * bookkeeping.
+	   *
+	   * @internal
+	   */
+
+	  Dispatcher.prototype._invokeCallback = function _invokeCallback(id) {
+	    this._isPending[id] = true;
+	    this._callbacks[id](this._pendingPayload);
+	    this._isHandled[id] = true;
+	  };
+
+	  /**
+	   * Set up bookkeeping needed when dispatching.
+	   *
+	   * @internal
+	   */
+
+	  Dispatcher.prototype._startDispatching = function _startDispatching(payload) {
+	    for (var id in this._callbacks) {
+	      this._isPending[id] = false;
+	      this._isHandled[id] = false;
+	    }
+	    this._pendingPayload = payload;
+	    this._isDispatching = true;
+	  };
+
+	  /**
+	   * Clear bookkeeping used for dispatching.
+	   *
+	   * @internal
+	   */
+
+	  Dispatcher.prototype._stopDispatching = function _stopDispatching() {
+	    delete this._pendingPayload;
+	    this._isDispatching = false;
+	  };
+
+	  return Dispatcher;
+	})();
+
+	module.exports = Dispatcher;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+
+/***/ },
+/* 9 */
+/***/ function(module, exports) {
+
+	// shim for using process in browser
+
+	var process = module.exports = {};
+	var queue = [];
+	var draining = false;
+	var currentQueue;
+	var queueIndex = -1;
+
+	function cleanUpNextTick() {
+	    draining = false;
+	    if (currentQueue.length) {
+	        queue = currentQueue.concat(queue);
+	    } else {
+	        queueIndex = -1;
+	    }
+	    if (queue.length) {
+	        drainQueue();
+	    }
+	}
+
+	function drainQueue() {
+	    if (draining) {
+	        return;
+	    }
+	    var timeout = setTimeout(cleanUpNextTick);
+	    draining = true;
+
+	    var len = queue.length;
+	    while(len) {
+	        currentQueue = queue;
+	        queue = [];
+	        while (++queueIndex < len) {
+	            if (currentQueue) {
+	                currentQueue[queueIndex].run();
+	            }
+	        }
+	        queueIndex = -1;
+	        len = queue.length;
+	    }
+	    currentQueue = null;
+	    draining = false;
+	    clearTimeout(timeout);
+	}
+
+	process.nextTick = function (fun) {
+	    var args = new Array(arguments.length - 1);
+	    if (arguments.length > 1) {
+	        for (var i = 1; i < arguments.length; i++) {
+	            args[i - 1] = arguments[i];
+	        }
+	    }
+	    queue.push(new Item(fun, args));
+	    if (queue.length === 1 && !draining) {
+	        setTimeout(drainQueue, 0);
+	    }
+	};
+
+	// v8 likes predictible objects
+	function Item(fun, array) {
+	    this.fun = fun;
+	    this.array = array;
+	}
+	Item.prototype.run = function () {
+	    this.fun.apply(null, this.array);
+	};
+	process.title = 'browser';
+	process.browser = true;
+	process.env = {};
+	process.argv = [];
+	process.version = ''; // empty string to avoid regexp issues
+	process.versions = {};
+
+	function noop() {}
+
+	process.on = noop;
+	process.addListener = noop;
+	process.once = noop;
+	process.off = noop;
+	process.removeListener = noop;
+	process.removeAllListeners = noop;
+	process.emit = noop;
+
+	process.binding = function (name) {
+	    throw new Error('process.binding is not supported');
+	};
+
+	process.cwd = function () { return '/' };
+	process.chdir = function (dir) {
+	    throw new Error('process.chdir is not supported');
+	};
+	process.umask = function() { return 0; };
+
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(process) {/**
+	 * Copyright 2013-2015, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 *
+	 * @providesModule invariant
+	 */
+
+	"use strict";
+
+	/**
+	 * Use invariant() to assert state which your program assumes to be true.
+	 *
+	 * Provide sprintf-style format (only %s is supported) and arguments
+	 * to provide information about what broke and what you were
+	 * expecting.
+	 *
+	 * The invariant message will be stripped in production, but the invariant
+	 * will remain to ensure logic does not differ in production.
+	 */
+
+	var invariant = function (condition, format, a, b, c, d, e, f) {
+	  if (process.env.NODE_ENV !== 'production') {
+	    if (format === undefined) {
+	      throw new Error('invariant requires an error message argument');
+	    }
+	  }
+
+	  if (!condition) {
+	    var error;
+	    if (format === undefined) {
+	      error = new Error('Minified exception occurred; use the non-minified dev environment ' + 'for the full error message and additional helpful warnings.');
+	    } else {
+	      var args = [a, b, c, d, e, f];
+	      var argIndex = 0;
+	      error = new Error('Invariant Violation: ' + format.replace(/%s/g, function () {
+	        return args[argIndex++];
+	      }));
+	    }
+
+	    error.framesToPop = 1; // we don't care about invariant's own frame
+	    throw error;
+	  }
+	};
+
+	module.exports = invariant;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var Store = __webpack_require__(12);
+
+	var AppStore = (function (_Store) {
+	  _inherits(AppStore, _Store);
+
+	  function AppStore() {
+	    _classCallCheck(this, AppStore);
+
+	    _get(Object.getPrototypeOf(AppStore.prototype), "constructor", this).apply(this, arguments);
+	  }
+
+	  _createClass(AppStore, [{
+	    key: "getDefaults",
+	    value: function getDefaults() {
+	      return {
+	        base_url: ""
+	      };
+	    }
+	  }]);
+
+	  return AppStore;
+	})(Store);
+
+	module.exports = new AppStore();
+
+/***/ },
+/* 12 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var EventEmitter = __webpack_require__(13).EventEmitter,
+	    _ = __webpack_require__(14);
+
+	function toArray(obj) {
+	  if (_.isArray(obj)) {
+	    return obj;
+	  } else {
+	    return [obj];
+	  }
+	}
+
+	var Store = (function (_EventEmitter) {
+	  _inherits(Store, _EventEmitter);
+
+	  function Store() {
+	    _classCallCheck(this, Store);
+
+	    _get(Object.getPrototypeOf(Store.prototype), "constructor", this).call(this);
+
+	    this.data = this.getDefaults();
+
+	    this.registerListeners();
+	  }
+
+	  _createClass(Store, [{
+	    key: "has",
+	    value: function has(key) {
+	      return this.data.hasOwnProperty(key);
+	    }
+	  }, {
+	    key: "get",
+	    value: function get(key) {
+	      return this.data[key];
+	    }
+	  }, {
+	    key: "getAll",
+	    value: function getAll() {
+	      return this.data;
+	    }
+	  }, {
+	    key: "setIfNotEqual",
+	    value: function setIfNotEqual(key, value) {
+	      var data = key;
+
+	      if (value !== undefined) {
+	        data = {};
+	        data[key] = value;
+	      }
+
+	      this.doSet(data, true);
+	    }
+	  }, {
+	    key: "set",
+	    value: function set(key, value) {
+	      var data = key;
+
+	      if (value !== undefined) {
+	        data = {};
+	        data[key] = value;
+	      }
+
+	      this.doSet(data, false);
+	    }
+	  }, {
+	    key: "doSet",
+	    value: function doSet(data, doEqualityCheck) {
+	      var changeset = {};
+	      var hasChange = false;
+
+	      _.keys(data).forEach(function (key) {
+
+	        var shouldSet = !doEqualityCheck || doEqualityCheck && !_.isEqual(data[key], this.data[key]);
+
+	        if (shouldSet) {
+	          hasChange = true;
+	          var oldValue = this.get(key),
+	              value = data[key];
+
+	          this.data[key] = value;
+	          changeset[key] = value;
+	          this.emit("change:" + key, value, oldValue);
+	        }
+	      }, this);
+
+	      if (!doEqualityCheck || doEqualityCheck && hasChange) {
+	        this.emit("change", changeset);
+	      }
+	    }
+	  }, {
+	    key: "unset",
+	    value: function unset(key) {
+	      if (this.has(key)) {
+	        var oldValue = this.get(key);
+	        delete this.data[key];
+
+	        this.emit("change:" + key, undefined, oldValue);
+	      }
+	    }
+	  }, {
+	    key: "clear",
+	    value: function clear() {
+	      var changeset = {};
+
+	      _.keys(this.data).forEach(function (key) {
+	        changeset[key] = this.get(key);
+	        this.unset(key);
+	      }, this);
+
+	      this.emit("change", changeset);
+	    }
+
+	    /**
+	     * Registers listeners.
+	     */
+	  }, {
+	    key: "registerListeners",
+	    value: function registerListeners() {}
+
+	    /**
+	     * Returns the default value of the store
+	     */
+	  }, {
+	    key: "getDefaults",
+	    value: function getDefaults() {
+	      return {};
+	    }
+	  }, {
+	    key: "reset",
+	    value: function reset() {
+	      this.data = this.getDefaults();
+	    }
+	  }, {
+	    key: "on",
+	    value: function on(type, callback) {
+	      var _this = this;
+
+	      toArray(type).forEach(function (t) {
+	        return _get(Object.getPrototypeOf(Store.prototype), "on", _this).call(_this, t, callback);
+	      });
+	    }
+	  }, {
+	    key: "once",
+	    value: function once(type, callback) {
+	      var _this2 = this;
+
+	      toArray(type).forEach(function (t) {
+	        return _get(Object.getPrototypeOf(Store.prototype), "once", _this2).call(_this2, t, callback);
+	      });
+	    }
+	  }, {
+	    key: "off",
+	    value: function off(type, callback) {
+	      var _this3 = this;
+
+	      toArray(type).forEach(function (t) {
+	        return _get(Object.getPrototypeOf(Store.prototype), "removeListener", _this3).call(_this3, t, callback);
+	      });
+	    }
+	  }]);
+
+	  return Store;
+	})(EventEmitter);
+
+	module.exports = Store;
+
+/***/ },
+/* 13 */
+/***/ function(module, exports) {
+
+	// Copyright Joyent, Inc. and other Node contributors.
+	//
+	// Permission is hereby granted, free of charge, to any person obtaining a
+	// copy of this software and associated documentation files (the
+	// "Software"), to deal in the Software without restriction, including
+	// without limitation the rights to use, copy, modify, merge, publish,
+	// distribute, sublicense, and/or sell copies of the Software, and to permit
+	// persons to whom the Software is furnished to do so, subject to the
+	// following conditions:
+	//
+	// The above copyright notice and this permission notice shall be included
+	// in all copies or substantial portions of the Software.
+	//
+	// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+	// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+	// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+	// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+	// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+	// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+	// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+	function EventEmitter() {
+	  this._events = this._events || {};
+	  this._maxListeners = this._maxListeners || undefined;
+	}
+	module.exports = EventEmitter;
+
+	// Backwards-compat with node 0.10.x
+	EventEmitter.EventEmitter = EventEmitter;
+
+	EventEmitter.prototype._events = undefined;
+	EventEmitter.prototype._maxListeners = undefined;
+
+	// By default EventEmitters will print a warning if more than 10 listeners are
+	// added to it. This is a useful default which helps finding memory leaks.
+	EventEmitter.defaultMaxListeners = 10;
+
+	// Obviously not all Emitters should be limited to 10. This function allows
+	// that to be increased. Set to zero for unlimited.
+	EventEmitter.prototype.setMaxListeners = function(n) {
+	  if (!isNumber(n) || n < 0 || isNaN(n))
+	    throw TypeError('n must be a positive number');
+	  this._maxListeners = n;
+	  return this;
+	};
+
+	EventEmitter.prototype.emit = function(type) {
+	  var er, handler, len, args, i, listeners;
+
+	  if (!this._events)
+	    this._events = {};
+
+	  // If there is no 'error' event listener then throw.
+	  if (type === 'error') {
+	    if (!this._events.error ||
+	        (isObject(this._events.error) && !this._events.error.length)) {
+	      er = arguments[1];
+	      if (er instanceof Error) {
+	        throw er; // Unhandled 'error' event
+	      }
+	      throw TypeError('Uncaught, unspecified "error" event.');
+	    }
+	  }
+
+	  handler = this._events[type];
+
+	  if (isUndefined(handler))
+	    return false;
+
+	  if (isFunction(handler)) {
+	    switch (arguments.length) {
+	      // fast cases
+	      case 1:
+	        handler.call(this);
+	        break;
+	      case 2:
+	        handler.call(this, arguments[1]);
+	        break;
+	      case 3:
+	        handler.call(this, arguments[1], arguments[2]);
+	        break;
+	      // slower
+	      default:
+	        len = arguments.length;
+	        args = new Array(len - 1);
+	        for (i = 1; i < len; i++)
+	          args[i - 1] = arguments[i];
+	        handler.apply(this, args);
+	    }
+	  } else if (isObject(handler)) {
+	    len = arguments.length;
+	    args = new Array(len - 1);
+	    for (i = 1; i < len; i++)
+	      args[i - 1] = arguments[i];
+
+	    listeners = handler.slice();
+	    len = listeners.length;
+	    for (i = 0; i < len; i++)
+	      listeners[i].apply(this, args);
+	  }
+
+	  return true;
+	};
+
+	EventEmitter.prototype.addListener = function(type, listener) {
+	  var m;
+
+	  if (!isFunction(listener))
+	    throw TypeError('listener must be a function');
+
+	  if (!this._events)
+	    this._events = {};
+
+	  // To avoid recursion in the case that type === "newListener"! Before
+	  // adding it to the listeners, first emit "newListener".
+	  if (this._events.newListener)
+	    this.emit('newListener', type,
+	              isFunction(listener.listener) ?
+	              listener.listener : listener);
+
+	  if (!this._events[type])
+	    // Optimize the case of one listener. Don't need the extra array object.
+	    this._events[type] = listener;
+	  else if (isObject(this._events[type]))
+	    // If we've already got an array, just append.
+	    this._events[type].push(listener);
+	  else
+	    // Adding the second element, need to change to array.
+	    this._events[type] = [this._events[type], listener];
+
+	  // Check for listener leak
+	  if (isObject(this._events[type]) && !this._events[type].warned) {
+	    var m;
+	    if (!isUndefined(this._maxListeners)) {
+	      m = this._maxListeners;
+	    } else {
+	      m = EventEmitter.defaultMaxListeners;
+	    }
+
+	    if (m && m > 0 && this._events[type].length > m) {
+	      this._events[type].warned = true;
+	      console.error('(node) warning: possible EventEmitter memory ' +
+	                    'leak detected. %d listeners added. ' +
+	                    'Use emitter.setMaxListeners() to increase limit.',
+	                    this._events[type].length);
+	      if (typeof console.trace === 'function') {
+	        // not supported in IE 10
+	        console.trace();
+	      }
+	    }
+	  }
+
+	  return this;
+	};
+
+	EventEmitter.prototype.on = EventEmitter.prototype.addListener;
+
+	EventEmitter.prototype.once = function(type, listener) {
+	  if (!isFunction(listener))
+	    throw TypeError('listener must be a function');
+
+	  var fired = false;
+
+	  function g() {
+	    this.removeListener(type, g);
+
+	    if (!fired) {
+	      fired = true;
+	      listener.apply(this, arguments);
+	    }
+	  }
+
+	  g.listener = listener;
+	  this.on(type, g);
+
+	  return this;
+	};
+
+	// emits a 'removeListener' event iff the listener was removed
+	EventEmitter.prototype.removeListener = function(type, listener) {
+	  var list, position, length, i;
+
+	  if (!isFunction(listener))
+	    throw TypeError('listener must be a function');
+
+	  if (!this._events || !this._events[type])
+	    return this;
+
+	  list = this._events[type];
+	  length = list.length;
+	  position = -1;
+
+	  if (list === listener ||
+	      (isFunction(list.listener) && list.listener === listener)) {
+	    delete this._events[type];
+	    if (this._events.removeListener)
+	      this.emit('removeListener', type, listener);
+
+	  } else if (isObject(list)) {
+	    for (i = length; i-- > 0;) {
+	      if (list[i] === listener ||
+	          (list[i].listener && list[i].listener === listener)) {
+	        position = i;
+	        break;
+	      }
+	    }
+
+	    if (position < 0)
+	      return this;
+
+	    if (list.length === 1) {
+	      list.length = 0;
+	      delete this._events[type];
+	    } else {
+	      list.splice(position, 1);
+	    }
+
+	    if (this._events.removeListener)
+	      this.emit('removeListener', type, listener);
+	  }
+
+	  return this;
+	};
+
+	EventEmitter.prototype.removeAllListeners = function(type) {
+	  var key, listeners;
+
+	  if (!this._events)
+	    return this;
+
+	  // not listening for removeListener, no need to emit
+	  if (!this._events.removeListener) {
+	    if (arguments.length === 0)
+	      this._events = {};
+	    else if (this._events[type])
+	      delete this._events[type];
+	    return this;
+	  }
+
+	  // emit removeListener for all listeners on all events
+	  if (arguments.length === 0) {
+	    for (key in this._events) {
+	      if (key === 'removeListener') continue;
+	      this.removeAllListeners(key);
+	    }
+	    this.removeAllListeners('removeListener');
+	    this._events = {};
+	    return this;
+	  }
+
+	  listeners = this._events[type];
+
+	  if (isFunction(listeners)) {
+	    this.removeListener(type, listeners);
+	  } else {
+	    // LIFO order
+	    while (listeners.length)
+	      this.removeListener(type, listeners[listeners.length - 1]);
+	  }
+	  delete this._events[type];
+
+	  return this;
+	};
+
+	EventEmitter.prototype.listeners = function(type) {
+	  var ret;
+	  if (!this._events || !this._events[type])
+	    ret = [];
+	  else if (isFunction(this._events[type]))
+	    ret = [this._events[type]];
+	  else
+	    ret = this._events[type].slice();
+	  return ret;
+	};
+
+	EventEmitter.listenerCount = function(emitter, type) {
+	  var ret;
+	  if (!emitter._events || !emitter._events[type])
+	    ret = 0;
+	  else if (isFunction(emitter._events[type]))
+	    ret = 1;
+	  else
+	    ret = emitter._events[type].length;
+	  return ret;
+	};
+
+	function isFunction(arg) {
+	  return typeof arg === 'function';
+	}
+
+	function isNumber(arg) {
+	  return typeof arg === 'number';
+	}
+
+	function isObject(arg) {
+	  return typeof arg === 'object' && arg !== null;
+	}
+
+	function isUndefined(arg) {
+	  return arg === void 0;
+	}
+
+
+/***/ },
+/* 14 */
+/***/ function(module, exports) {
+
+	module.exports = _;
+
+/***/ },
+/* 15 */
+/***/ function(module, exports) {
+
+	module.exports = $;
+
+/***/ },
+/* 16 */
+/***/ function(module, exports) {
+
+	module.exports = AP;
+
+/***/ },
+/* 17 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var Store = __webpack_require__(12),
+	    AppDispatcher = __webpack_require__(6),
+	    _ = __webpack_require__(14);
+
+	var AliasStore = (function (_Store) {
+	  _inherits(AliasStore, _Store);
+
+	  function AliasStore() {
+	    _classCallCheck(this, AliasStore);
+
+	    _get(Object.getPrototypeOf(AliasStore.prototype), "constructor", this).apply(this, arguments);
+	  }
+
+	  _createClass(AliasStore, [{
+	    key: "getDefaults",
+	    value: function getDefaults() {
+	      return {
+	        aliases: [],
+	        adding_alias: false,
+	        loading: true
+	      };
+	    }
+	  }, {
+	    key: "registerListeners",
+	    value: function registerListeners() {
+	      var _this = this;
+
+	      this.dispatchToken = AppDispatcher.register(function (action) {
+	        switch (action.type) {
+	          case "aliases-fetched":
+	            _this.set({
+	              "aliases": action.payload,
+	              "loading": false
+	            });
+	            break;
+	          case "alias-deleted":
+	            var newAliases = _.filter(_this.data.aliases, function (alias) {
+	              return alias.alias !== action.alias;
+	            });
+	            _this.set("aliases", newAliases);
+	            break;
+	          case "alias-updated":
+	            var updatedAlias = _.find(_this.data.aliases, function (alias) {
+	              return alias.alias === action.payload.alias;
+	            });
+	            updatedAlias.mentions = action.payload.mentions;
+	            _this.set("aliases", _this.data.aliases);
+	            break;
+	          case "alias-saved":
+	            _this.set({
+	              "aliases": action.payload,
+	              "adding_alias": false
+	            });
+	            break;
+	          case "configure-new-alias":
+	            _this.set({
+	              "adding_alias": true
+	            });
+	            break;
+	        }
+	      });
+	    }
+	  }]);
+
+	  return AliasStore;
+	})(Store);
+
+	module.exports = new AliasStore();
+
+/***/ },
+/* 18 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var React = __webpack_require__(3),
+	    AliasActions = __webpack_require__(5),
+	    AliasStore = __webpack_require__(17),
+	    _ = __webpack_require__(14),
+	    Select = __webpack_require__(19);
+
+	module.exports = React.createClass({
+
+	  displayName: "Alias",
+
+	  propTypes: {
+	    alias: React.PropTypes.string.isRequired,
+	    mentions: React.PropTypes.arrayOf(React.PropTypes.string).isRequired
+	  },
+
+	  getInitialState: function getInitialState() {
+	    return {
+	      edit: false,
+	      edited_mentions: null
+	    };
+	  },
+
+	  componentDidMount: function componentDidMount() {},
+
+	  _onChange: function _onChange() {
+	    this.setState(this._getState());
+	  },
+
+	  _getState: function _getState() {
+	    return {};
+	  },
+
+	  _delete: function _delete(e) {
+	    AliasActions.deleteAlias(this.props.alias);
+	    e.stopPropagation();
+	  },
+
+	  _select: function _select() {
+	    AliasActions.appendAliasToChat({
+	      alias: this.props.alias,
+	      mentions: this.props.mentions
+	    });
+	  },
+
+	  _edit: function _edit(e) {
+	    this.setState({
+	      edit: true
+	    });
+
+	    e.stopPropagation();
+	  },
+
+	  _renderEdit: function _renderEdit() {
+
+	    var mentions = this.state.edited_mentions || this.props.mentions;
+	    var value = mentions.join(",");
+
+	    return React.createElement(
+	      "tr",
+	      { className: "alias edit", "data-alias": this.props.alias, key: this.props.alias },
+	      React.createElement(
+	        "td",
+	        { className: "name" },
+	        React.createElement(
+	          "span",
+	          { className: "hc-mention hc-mention-me" },
+	          this.props.alias
+	        )
+	      ),
+	      React.createElement(
+	        "td",
+	        { className: "mentions" },
+	        React.createElement(Select, { multi: true,
+	          allowCreate: true,
+	          value: value,
+	          delimitier: ",",
+	          asyncOptions: this._getSelectOptions,
+	          onChange: this._onMentionsChange })
+	      ),
+	      React.createElement(
+	        "td",
+	        { className: "actions aui-compact-button-column" },
+	        React.createElement(
+	          "a",
+	          { className: "aui-icon aui-icon-small aui-iconfont-success save", onClick: this._saveEdit },
+	          "Edit"
+	        ),
+	        React.createElement(
+	          "a",
+	          { className: "aui-icon aui-icon-small aui-iconfont-undo cancel", onClick: this._cancelEdit },
+	          "Delete"
+	        )
+	      )
+	    );
+	  },
+
+	  _getSelectOptions: function _getSelectOptions(input, callback) {
+	    AliasActions.getUsers(input, callback);
+	  },
+
+	  _saveEdit: function _saveEdit() {
+	    AliasActions.updateMentions(this.props.alias, this.state.edited_mentions || this.props.mentions);
+	    this.setState({
+	      edit: false
+	    });
+	  },
+
+	  _cancelEdit: function _cancelEdit() {
+	    this.setState({
+	      edit: false
+	    });
+	  },
+
+	  _onMentionsChange: function _onMentionsChange(val) {
+	    var mentions = val.split(",");
+	    this.setState({
+	      edited_mentions: mentions
+	    });
+	  },
+
+	  render: function render() {
+
+	    if (this.state.edit) {
+	      return this._renderEdit();
+	    }
+
+	    var mentions = _.map(this.props.mentions, function (mention) {
+	      return React.createElement(
+	        "span",
+	        { className: "hc-mention" },
+	        { mention: mention }
+	      );
+	    });
+
+	    return React.createElement(
+	      "tr",
+	      { className: "alias", "data-alias": this.props.alias, key: this.props.alias, onClick: this._select },
+	      React.createElement(
+	        "td",
+	        { className: "name" },
+	        React.createElement(
+	          "span",
+	          { className: "hc-mention hc-mention-me" },
+	          this.props.alias
+	        )
+	      ),
+	      React.createElement(
+	        "td",
+	        { className: "mentions" },
+	        mentions
+	      ),
+	      React.createElement(
+	        "td",
+	        { className: "actions aui-compact-button-column" },
+	        React.createElement(
+	          "a",
+	          { className: "aui-icon aui-icon-small aui-iconfont-edit edit", onClick: this._edit },
+	          "Edit"
+	        ),
+	        React.createElement(
+	          "a",
+	          { className: "aui-icon aui-icon-small aui-iconfont-delete delete", onClick: this._delete },
+	          "Delete"
+	        )
+	      )
+	    );
+	  }
+	});
+
+/***/ },
+/* 19 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* disable some rules until we refactor more completely; fixing them now would
+	   cause conflicts with some open PRs unnecessarily. */
+	/* eslint react/jsx-sort-prop-types: 0, react/sort-comp: 0, react/prop-types: 0 */
+
+	'use strict';
+
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+	var React = __webpack_require__(3);
+	var Input = __webpack_require__(20);
+	var classes = __webpack_require__(21);
+	var Value = __webpack_require__(22);
+	var SingleValue = __webpack_require__(23);
+	var Option = __webpack_require__(24);
+
+	var requestId = 0;
+
+	var Select = React.createClass({
+
+		displayName: 'Select',
+
+		propTypes: {
+			addLabelText: React.PropTypes.string, // placeholder displayed when you want to add a label on a multi-value input
+			allowCreate: React.PropTypes.bool, // whether to allow creation of new entries
+			asyncOptions: React.PropTypes.func, // function to call to get options
+			autoload: React.PropTypes.bool, // whether to auto-load the default async options set
+			backspaceRemoves: React.PropTypes.bool, // whether backspace removes an item if there is no text input
+			cacheAsyncResults: React.PropTypes.bool, // whether to allow cache
+			className: React.PropTypes.string, // className for the outer element
+			clearAllText: React.PropTypes.string, // title for the "clear" control when multi: true
+			clearValueText: React.PropTypes.string, // title for the "clear" control
+			clearable: React.PropTypes.bool, // should it be possible to reset value
+			delimiter: React.PropTypes.string, // delimiter to use to join multiple values
+			disabled: React.PropTypes.bool, // whether the Select is disabled or not
+			filterOption: React.PropTypes.func, // method to filter a single option: function(option, filterString)
+			filterOptions: React.PropTypes.func, // method to filter the options array: function([options], filterString, [values])
+			ignoreCase: React.PropTypes.bool, // whether to perform case-insensitive filtering
+			inputProps: React.PropTypes.object, // custom attributes for the Input (in the Select-control) e.g: {'data-foo': 'bar'}
+			matchPos: React.PropTypes.string, // (any|start) match the start or entire string when filtering
+			matchProp: React.PropTypes.string, // (any|label|value) which option property to filter on
+			multi: React.PropTypes.bool, // multi-value input
+			name: React.PropTypes.string, // field name, for hidden <input /> tag
+			newOptionCreator: React.PropTypes.func, // factory to create new options when allowCreate set
+			noResultsText: React.PropTypes.string, // placeholder displayed when there are no matching search results
+			onBlur: React.PropTypes.func, // onBlur handler: function(event) {}
+			onChange: React.PropTypes.func, // onChange handler: function(newValue) {}
+			onFocus: React.PropTypes.func, // onFocus handler: function(event) {}
+			onOptionLabelClick: React.PropTypes.func, // onCLick handler for value labels: function (value, event) {}
+			optionComponent: React.PropTypes.func, // option component to render in dropdown
+			optionRenderer: React.PropTypes.func, // optionRenderer: function(option) {}
+			options: React.PropTypes.array, // array of options
+			placeholder: React.PropTypes.string, // field placeholder, displayed when there's no value
+			searchable: React.PropTypes.bool, // whether to enable searching feature or not
+			searchingText: React.PropTypes.string, // message to display whilst options are loading via asyncOptions
+			searchPromptText: React.PropTypes.string, // label to prompt for search input
+			singleValueComponent: React.PropTypes.func, // single value component when multiple is set to false
+			value: React.PropTypes.any, // initial field value
+			valueComponent: React.PropTypes.func, // value component to render in multiple mode
+			valueRenderer: React.PropTypes.func // valueRenderer: function(option) {}
+		},
+
+		getDefaultProps: function getDefaultProps() {
+			return {
+				addLabelText: 'Add "{label}"?',
+				allowCreate: false,
+				asyncOptions: undefined,
+				autoload: true,
+				backspaceRemoves: true,
+				cacheAsyncResults: true,
+				className: undefined,
+				clearAllText: 'Clear all',
+				clearValueText: 'Clear value',
+				clearable: true,
+				delimiter: ',',
+				disabled: false,
+				ignoreCase: true,
+				inputProps: {},
+				matchPos: 'any',
+				matchProp: 'any',
+				name: undefined,
+				newOptionCreator: undefined,
+				noResultsText: 'No results found',
+				onChange: undefined,
+				onOptionLabelClick: undefined,
+				optionComponent: Option,
+				options: undefined,
+				placeholder: 'Select...',
+				searchable: true,
+				searchingText: 'Searching...',
+				searchPromptText: 'Type to search',
+				singleValueComponent: SingleValue,
+				value: undefined,
+				valueComponent: Value
+			};
+		},
+
+		getInitialState: function getInitialState() {
+			return {
+				/*
+	    * set by getStateFromValue on componentWillMount:
+	    * - value
+	    * - values
+	    * - filteredOptions
+	    * - inputValue
+	    * - placeholder
+	    * - focusedOption
+	   */
+				isFocused: false,
+				isLoading: false,
+				isOpen: false,
+				options: this.props.options
+			};
+		},
+
+		componentWillMount: function componentWillMount() {
+			var _this = this;
+
+			this._optionsCache = {};
+			this._optionsFilterString = '';
+			this._closeMenuIfClickedOutside = function (event) {
+				if (!_this.state.isOpen) {
+					return;
+				}
+				var menuElem = React.findDOMNode(_this.refs.selectMenuContainer);
+				var controlElem = React.findDOMNode(_this.refs.control);
+
+				var eventOccuredOutsideMenu = _this.clickedOutsideElement(menuElem, event);
+				var eventOccuredOutsideControl = _this.clickedOutsideElement(controlElem, event);
+
+				// Hide dropdown menu if click occurred outside of menu
+				if (eventOccuredOutsideMenu && eventOccuredOutsideControl) {
+					_this.setState({
+						isOpen: false
+					}, _this._unbindCloseMenuIfClickedOutside);
+				}
+			};
+			this._bindCloseMenuIfClickedOutside = function () {
+				if (!document.addEventListener && document.attachEvent) {
+					document.attachEvent('onclick', this._closeMenuIfClickedOutside);
+				} else {
+					document.addEventListener('click', this._closeMenuIfClickedOutside);
+				}
+			};
+			this._unbindCloseMenuIfClickedOutside = function () {
+				if (!document.removeEventListener && document.detachEvent) {
+					document.detachEvent('onclick', this._closeMenuIfClickedOutside);
+				} else {
+					document.removeEventListener('click', this._closeMenuIfClickedOutside);
+				}
+			};
+			this.setState(this.getStateFromValue(this.props.value));
+		},
+
+		componentDidMount: function componentDidMount() {
+			if (this.props.asyncOptions && this.props.autoload) {
+				this.autoloadAsyncOptions();
+			}
+		},
+
+		componentWillUnmount: function componentWillUnmount() {
+			clearTimeout(this._blurTimeout);
+			clearTimeout(this._focusTimeout);
+			if (this.state.isOpen) {
+				this._unbindCloseMenuIfClickedOutside();
+			}
+		},
+
+		componentWillReceiveProps: function componentWillReceiveProps(newProps) {
+			var _this2 = this;
+
+			var optionsChanged = false;
+			if (JSON.stringify(newProps.options) !== JSON.stringify(this.props.options)) {
+				optionsChanged = true;
+				this.setState({
+					options: newProps.options,
+					filteredOptions: this.filterOptions(newProps.options)
+				});
+			}
+			if (newProps.value !== this.state.value || newProps.placeholder !== this.props.placeholder || optionsChanged) {
+				var setState = function setState(newState) {
+					_this2.setState(_this2.getStateFromValue(newProps.value, newState && newState.options || newProps.options, newProps.placeholder));
+				};
+				if (this.props.asyncOptions) {
+					this.loadAsyncOptions(newProps.value, {}, setState);
+				} else {
+					setState();
+				}
+			}
+		},
+
+		componentDidUpdate: function componentDidUpdate() {
+			var _this3 = this;
+
+			if (!this.props.disabled && this._focusAfterUpdate) {
+				clearTimeout(this._blurTimeout);
+				this._focusTimeout = setTimeout(function () {
+					_this3.getInputNode().focus();
+					_this3._focusAfterUpdate = false;
+				}, 50);
+			}
+			if (this._focusedOptionReveal) {
+				if (this.refs.focused && this.refs.menu) {
+					var focusedDOM = React.findDOMNode(this.refs.focused);
+					var menuDOM = React.findDOMNode(this.refs.menu);
+					var focusedRect = focusedDOM.getBoundingClientRect();
+					var menuRect = menuDOM.getBoundingClientRect();
+
+					if (focusedRect.bottom > menuRect.bottom || focusedRect.top < menuRect.top) {
+						menuDOM.scrollTop = focusedDOM.offsetTop + focusedDOM.clientHeight - menuDOM.offsetHeight;
+					}
+				}
+				this._focusedOptionReveal = false;
+			}
+		},
+
+		focus: function focus() {
+			this.getInputNode().focus();
+		},
+
+		clickedOutsideElement: function clickedOutsideElement(element, event) {
+			var eventTarget = event.target ? event.target : event.srcElement;
+			while (eventTarget != null) {
+				if (eventTarget === element) return false;
+				eventTarget = eventTarget.offsetParent;
+			}
+			return true;
+		},
+
+		getStateFromValue: function getStateFromValue(value, options, placeholder) {
+			if (!options) {
+				options = this.state.options;
+			}
+			if (!placeholder) {
+				placeholder = this.props.placeholder;
+			}
+
+			// reset internal filter string
+			this._optionsFilterString = '';
+
+			var values = this.initValuesArray(value, options);
+			var filteredOptions = this.filterOptions(options, values);
+
+			var focusedOption;
+			var valueForState = null;
+			if (!this.props.multi && values.length) {
+				focusedOption = values[0];
+				valueForState = values[0].value;
+			} else {
+				focusedOption = this.getFirstFocusableOption(filteredOptions);
+				valueForState = values.map(function (v) {
+					return v.value;
+				}).join(this.props.delimiter);
+			}
+
+			return {
+				value: valueForState,
+				values: values,
+				inputValue: '',
+				filteredOptions: filteredOptions,
+				placeholder: !this.props.multi && values.length ? values[0].label : placeholder,
+				focusedOption: focusedOption
+			};
+		},
+
+		getFirstFocusableOption: function getFirstFocusableOption(options) {
+
+			for (var optionIndex = 0; optionIndex < options.length; ++optionIndex) {
+				if (!options[optionIndex].disabled) {
+					return options[optionIndex];
+				}
+			}
+		},
+
+		initValuesArray: function initValuesArray(values, options) {
+			if (!Array.isArray(values)) {
+				if (typeof values === 'string') {
+					values = values === '' ? [] : values.split(this.props.delimiter);
+				} else {
+					values = values !== undefined && values !== null ? [values] : [];
+				}
+			}
+			return values.map(function (val) {
+				if (typeof val === 'string' || typeof val === 'number') {
+					for (var key in options) {
+						if (options.hasOwnProperty(key) && options[key] && (options[key].value === val || typeof options[key].value === 'number' && options[key].value.toString() === val)) {
+							return options[key];
+						}
+					}
+					return { value: val, label: val };
+				} else {
+					return val;
+				}
+			});
+		},
+
+		setValue: function setValue(value, focusAfterUpdate) {
+			if (focusAfterUpdate || focusAfterUpdate === undefined) {
+				this._focusAfterUpdate = true;
+			}
+			var newState = this.getStateFromValue(value);
+			newState.isOpen = false;
+			this.fireChangeEvent(newState);
+			this.setState(newState);
+		},
+
+		selectValue: function selectValue(value) {
+			if (!this.props.multi) {
+				this.setValue(value);
+			} else if (value) {
+				this.addValue(value);
+			}
+			this._unbindCloseMenuIfClickedOutside();
+		},
+
+		addValue: function addValue(value) {
+			this.setValue(this.state.values.concat(value));
+		},
+
+		popValue: function popValue() {
+			this.setValue(this.state.values.slice(0, this.state.values.length - 1));
+		},
+
+		removeValue: function removeValue(valueToRemove) {
+			this.setValue(this.state.values.filter(function (value) {
+				return value !== valueToRemove;
+			}));
+		},
+
+		clearValue: function clearValue(event) {
+			// if the event was triggered by a mousedown and not the primary
+			// button, ignore it.
+			if (event && event.type === 'mousedown' && event.button !== 0) {
+				return;
+			}
+			event.stopPropagation();
+			event.preventDefault();
+			this.setValue(null);
+		},
+
+		resetValue: function resetValue() {
+			this.setValue(this.state.value === '' ? null : this.state.value);
+		},
+
+		getInputNode: function getInputNode() {
+			var input = this.refs.input;
+			return this.props.searchable ? input : React.findDOMNode(input);
+		},
+
+		fireChangeEvent: function fireChangeEvent(newState) {
+			if (newState.value !== this.state.value && this.props.onChange) {
+				this.props.onChange(newState.value, newState.values);
+			}
+		},
+
+		handleMouseDown: function handleMouseDown(event) {
+			// if the event was triggered by a mousedown and not the primary
+			// button, or if the component is disabled, ignore it.
+			if (this.props.disabled || event.type === 'mousedown' && event.button !== 0) {
+				return;
+			}
+			event.stopPropagation();
+			event.preventDefault();
+
+			// for the non-searchable select, close the dropdown when button is clicked
+			if (this.state.isOpen && !this.props.searchable) {
+				this.setState({
+					isOpen: false
+				}, this._unbindCloseMenuIfClickedOutside);
+				return;
+			}
+
+			if (this.state.isFocused) {
+				this.setState({
+					isOpen: true
+				}, this._bindCloseMenuIfClickedOutside);
+			} else {
+				this._openAfterFocus = true;
+				this.getInputNode().focus();
+			}
+		},
+
+		handleMouseDownOnArrow: function handleMouseDownOnArrow(event) {
+			// if the event was triggered by a mousedown and not the primary
+			// button, or if the component is disabled, ignore it.
+			if (this.props.disabled || event.type === 'mousedown' && event.button !== 0) {
+				return;
+			}
+			// If not focused, handleMouseDown will handle it
+			if (!this.state.isOpen) {
+				return;
+			}
+			event.stopPropagation();
+			event.preventDefault();
+			this.setState({
+				isOpen: false
+			}, this._unbindCloseMenuIfClickedOutside);
+		},
+
+		handleInputFocus: function handleInputFocus(event) {
+			var newIsOpen = this.state.isOpen || this._openAfterFocus;
+			this.setState({
+				isFocused: true,
+				isOpen: newIsOpen
+			}, function () {
+				if (newIsOpen) {
+					this._bindCloseMenuIfClickedOutside();
+				} else {
+					this._unbindCloseMenuIfClickedOutside();
+				}
+			});
+			this._openAfterFocus = false;
+			if (this.props.onFocus) {
+				this.props.onFocus(event);
+			}
+		},
+
+		handleInputBlur: function handleInputBlur(event) {
+			var _this4 = this;
+
+			this._blurTimeout = setTimeout(function () {
+				if (_this4._focusAfterUpdate) return;
+				_this4.setState({
+					isFocused: false,
+					isOpen: false
+				});
+			}, 50);
+			if (this.props.onBlur) {
+				this.props.onBlur(event);
+			}
+		},
+
+		handleKeyDown: function handleKeyDown(event) {
+			if (this.props.disabled) return;
+			switch (event.keyCode) {
+				case 8:
+					// backspace
+					if (!this.state.inputValue && this.props.backspaceRemoves) {
+						this.popValue();
+					}
+					return;
+				case 9:
+					// tab
+					if (event.shiftKey || !this.state.isOpen || !this.state.focusedOption) {
+						return;
+					}
+					this.selectFocusedOption();
+					break;
+				case 13:
+					// enter
+					if (!this.state.isOpen) return;
+
+					this.selectFocusedOption();
+					break;
+				case 27:
+					// escape
+					if (this.state.isOpen) {
+						this.resetValue();
+					} else if (this.props.clearable) {
+						this.clearValue(event);
+					}
+					break;
+				case 38:
+					// up
+					this.focusPreviousOption();
+					break;
+				case 40:
+					// down
+					this.focusNextOption();
+					break;
+				case 188:
+					// ,
+					if (this.props.allowCreate && this.props.multi) {
+						event.preventDefault();
+						event.stopPropagation();
+						this.selectFocusedOption();
+					} else {
+						return;
+					}
+					break;
+				default:
+					return;
+			}
+			event.preventDefault();
+		},
+
+		// Ensures that the currently focused option is available in filteredOptions.
+		// If not, returns the first available option.
+		_getNewFocusedOption: function _getNewFocusedOption(filteredOptions) {
+			for (var key in filteredOptions) {
+				if (filteredOptions.hasOwnProperty(key) && filteredOptions[key] === this.state.focusedOption) {
+					return filteredOptions[key];
+				}
+			}
+			return this.getFirstFocusableOption(filteredOptions);
+		},
+
+		handleInputChange: function handleInputChange(event) {
+			// assign an internal variable because we need to use
+			// the latest value before setState() has completed.
+			this._optionsFilterString = event.target.value;
+
+			if (this.props.asyncOptions) {
+				this.setState({
+					isLoading: true,
+					inputValue: event.target.value
+				});
+				this.loadAsyncOptions(event.target.value, {
+					isLoading: false,
+					isOpen: true
+				}, this._bindCloseMenuIfClickedOutside);
+			} else {
+				var filteredOptions = this.filterOptions(this.state.options);
+				this.setState({
+					isOpen: true,
+					inputValue: event.target.value,
+					filteredOptions: filteredOptions,
+					focusedOption: this._getNewFocusedOption(filteredOptions)
+				}, this._bindCloseMenuIfClickedOutside);
+			}
+		},
+
+		autoloadAsyncOptions: function autoloadAsyncOptions() {
+			var _this5 = this;
+
+			this.loadAsyncOptions(this.props.value || '', {}, function () {
+				// update with fetched but don't focus
+				_this5.setValue(_this5.props.value, false);
+			});
+		},
+
+		loadAsyncOptions: function loadAsyncOptions(input, state, callback) {
+			var _this6 = this;
+
+			var thisRequestId = this._currentRequestId = requestId++;
+			if (this.props.cacheAsyncResults) {
+				for (var i = 0; i <= input.length; i++) {
+					var cacheKey = input.slice(0, i);
+					if (this._optionsCache[cacheKey] && (input === cacheKey || this._optionsCache[cacheKey].complete)) {
+						var options = this._optionsCache[cacheKey].options;
+						var filteredOptions = this.filterOptions(options);
+						var newState = {
+							options: options,
+							filteredOptions: filteredOptions,
+							focusedOption: this._getNewFocusedOption(filteredOptions)
+						};
+						for (var key in state) {
+							if (state.hasOwnProperty(key)) {
+								newState[key] = state[key];
+							}
+						}
+						this.setState(newState);
+						if (callback) callback.call(this, newState);
+						return;
+					}
+				}
+			}
+
+			this.props.asyncOptions(input, function (err, data) {
+				if (err) throw err;
+				if (_this6.props.cacheAsyncResults) {
+					_this6._optionsCache[input] = data;
+				}
+				if (thisRequestId !== _this6._currentRequestId) {
+					return;
+				}
+				var filteredOptions = _this6.filterOptions(data.options);
+				var newState = {
+					options: data.options,
+					filteredOptions: filteredOptions,
+					focusedOption: _this6._getNewFocusedOption(filteredOptions)
+				};
+				for (var key in state) {
+					if (state.hasOwnProperty(key)) {
+						newState[key] = state[key];
+					}
+				}
+				_this6.setState(newState);
+				if (callback) callback.call(_this6, newState);
+			});
+		},
+
+		filterOptions: function filterOptions(options, values) {
+			var filterValue = this._optionsFilterString;
+			var exclude = (values || this.state.values).map(function (i) {
+				return i.value;
+			});
+			if (this.props.filterOptions) {
+				return this.props.filterOptions.call(this, options, filterValue, exclude);
+			} else {
+				var filterOption = function filterOption(op) {
+					if (this.props.multi && exclude.indexOf(op.value) > -1) return false;
+					if (this.props.filterOption) return this.props.filterOption.call(this, op, filterValue);
+					var valueTest = String(op.value),
+					    labelTest = String(op.label);
+					if (this.props.ignoreCase) {
+						valueTest = valueTest.toLowerCase();
+						labelTest = labelTest.toLowerCase();
+						filterValue = filterValue.toLowerCase();
+					}
+					return !filterValue || this.props.matchPos === 'start' ? this.props.matchProp !== 'label' && valueTest.substr(0, filterValue.length) === filterValue || this.props.matchProp !== 'value' && labelTest.substr(0, filterValue.length) === filterValue : this.props.matchProp !== 'label' && valueTest.indexOf(filterValue) >= 0 || this.props.matchProp !== 'value' && labelTest.indexOf(filterValue) >= 0;
+				};
+				return (options || []).filter(filterOption, this);
+			}
+		},
+
+		selectFocusedOption: function selectFocusedOption() {
+			if (this.props.allowCreate && !this.state.focusedOption) {
+				return this.selectValue(this.state.inputValue);
+			}
+
+			if (this.state.focusedOption) {
+				return this.selectValue(this.state.focusedOption);
+			}
+		},
+
+		focusOption: function focusOption(op) {
+			this.setState({
+				focusedOption: op
+			});
+		},
+
+		focusNextOption: function focusNextOption() {
+			this.focusAdjacentOption('next');
+		},
+
+		focusPreviousOption: function focusPreviousOption() {
+			this.focusAdjacentOption('previous');
+		},
+
+		focusAdjacentOption: function focusAdjacentOption(dir) {
+			this._focusedOptionReveal = true;
+			var ops = this.state.filteredOptions.filter(function (op) {
+				return !op.disabled;
+			});
+			if (!this.state.isOpen) {
+				this.setState({
+					isOpen: true,
+					inputValue: '',
+					focusedOption: this.state.focusedOption || ops[dir === 'next' ? 0 : ops.length - 1]
+				}, this._bindCloseMenuIfClickedOutside);
+				return;
+			}
+			if (!ops.length) {
+				return;
+			}
+			var focusedIndex = -1;
+			for (var i = 0; i < ops.length; i++) {
+				if (this.state.focusedOption === ops[i]) {
+					focusedIndex = i;
+					break;
+				}
+			}
+			var focusedOption = ops[0];
+			if (dir === 'next' && focusedIndex > -1 && focusedIndex < ops.length - 1) {
+				focusedOption = ops[focusedIndex + 1];
+			} else if (dir === 'previous') {
+				if (focusedIndex > 0) {
+					focusedOption = ops[focusedIndex - 1];
+				} else {
+					focusedOption = ops[ops.length - 1];
+				}
+			}
+			this.setState({
+				focusedOption: focusedOption
+			});
+		},
+
+		unfocusOption: function unfocusOption(op) {
+			if (this.state.focusedOption === op) {
+				this.setState({
+					focusedOption: null
+				});
+			}
+		},
+
+		buildMenu: function buildMenu() {
+			var focusedValue = this.state.focusedOption ? this.state.focusedOption.value : null;
+			var renderLabel = this.props.optionRenderer || function (op) {
+				return op.label;
+			};
+			if (this.state.filteredOptions.length > 0) {
+				focusedValue = focusedValue == null ? this.state.filteredOptions[0] : focusedValue;
+			}
+			// Add the current value to the filtered options in last resort
+			var options = this.state.filteredOptions;
+			if (this.props.allowCreate && this.state.inputValue.trim()) {
+				var inputValue = this.state.inputValue;
+				options = options.slice();
+				var newOption = this.props.newOptionCreator ? this.props.newOptionCreator(inputValue) : {
+					value: inputValue,
+					label: inputValue,
+					create: true
+				};
+				options.unshift(newOption);
+			}
+			var ops = Object.keys(options).map(function (key) {
+				var op = options[key];
+				var isSelected = this.state.value === op.value;
+				var isFocused = focusedValue === op.value;
+				var optionClass = classes({
+					'Select-option': true,
+					'is-selected': isSelected,
+					'is-focused': isFocused,
+					'is-disabled': op.disabled
+				});
+				var ref = isFocused ? 'focused' : null;
+				var mouseEnter = this.focusOption.bind(this, op);
+				var mouseLeave = this.unfocusOption.bind(this, op);
+				var mouseDown = this.selectValue.bind(this, op);
+				var optionResult = React.createElement(this.props.optionComponent, {
+					key: 'option-' + op.value,
+					className: optionClass,
+					renderFunc: renderLabel,
+					mouseEnter: mouseEnter,
+					mouseLeave: mouseLeave,
+					mouseDown: mouseDown,
+					click: mouseDown,
+					addLabelText: this.props.addLabelText,
+					option: op,
+					ref: ref
+				});
+				return optionResult;
+			}, this);
+
+			if (ops.length) {
+				return ops;
+			} else {
+				var noResultsText, promptClass;
+				if (this.state.isLoading) {
+					promptClass = 'Select-searching';
+					noResultsText = this.props.searchingText;
+				} else if (this.state.inputValue || !this.props.asyncOptions) {
+					promptClass = 'Select-noresults';
+					noResultsText = this.props.noResultsText;
+				} else {
+					promptClass = 'Select-search-prompt';
+					noResultsText = this.props.searchPromptText;
+				}
+
+				return React.createElement(
+					'div',
+					{ className: promptClass },
+					noResultsText
+				);
+			}
+		},
+
+		handleOptionLabelClick: function handleOptionLabelClick(value, event) {
+			if (this.props.onOptionLabelClick) {
+				this.props.onOptionLabelClick(value, event);
+			}
+		},
+
+		render: function render() {
+			var selectClass = classes('Select', this.props.className, {
+				'is-multi': this.props.multi,
+				'is-searchable': this.props.searchable,
+				'is-open': this.state.isOpen,
+				'is-focused': this.state.isFocused,
+				'is-loading': this.state.isLoading,
+				'is-disabled': this.props.disabled,
+				'has-value': this.state.value
+			});
+			var value = [];
+			if (this.props.multi) {
+				this.state.values.forEach(function (val) {
+					var onOptionLabelClick = this.handleOptionLabelClick.bind(this, val);
+					var onRemove = this.removeValue.bind(this, val);
+					var valueComponent = React.createElement(this.props.valueComponent, {
+						key: val.value,
+						option: val,
+						renderer: this.props.valueRenderer,
+						optionLabelClick: !!this.props.onOptionLabelClick,
+						onOptionLabelClick: onOptionLabelClick,
+						onRemove: onRemove,
+						disabled: this.props.disabled
+					});
+					value.push(valueComponent);
+				}, this);
+			}
+
+			if (!this.state.inputValue && (!this.props.multi || !value.length)) {
+				var val = this.state.values[0] || null;
+				if (this.props.valueRenderer && !!this.state.values.length) {
+					value.push(React.createElement(Value, {
+						key: 0,
+						option: val,
+						renderer: this.props.valueRenderer,
+						disabled: this.props.disabled }));
+				} else {
+					var singleValueComponent = React.createElement(this.props.singleValueComponent, {
+						key: 'placeholder',
+						value: val,
+						placeholder: this.state.placeholder
+					});
+					value.push(singleValueComponent);
+				}
+			}
+
+			var loading = this.state.isLoading ? React.createElement('span', { className: 'Select-loading', 'aria-hidden': 'true' }) : null;
+			var clear = this.props.clearable && this.state.value && !this.props.disabled ? React.createElement('span', { className: 'Select-clear', title: this.props.multi ? this.props.clearAllText : this.props.clearValueText, 'aria-label': this.props.multi ? this.props.clearAllText : this.props.clearValueText, onMouseDown: this.clearValue, onClick: this.clearValue, dangerouslySetInnerHTML: { __html: '&times;' } }) : null;
+
+			var menu;
+			var menuProps;
+			if (this.state.isOpen) {
+				menuProps = {
+					ref: 'menu',
+					className: 'Select-menu',
+					onMouseDown: this.handleMouseDown
+				};
+				menu = React.createElement(
+					'div',
+					{ ref: 'selectMenuContainer', className: 'Select-menu-outer' },
+					React.createElement(
+						'div',
+						menuProps,
+						this.buildMenu()
+					)
+				);
+			}
+
+			var input;
+			var inputProps = {
+				ref: 'input',
+				className: 'Select-input ' + (this.props.inputProps.className || ''),
+				tabIndex: this.props.tabIndex || 0,
+				onFocus: this.handleInputFocus,
+				onBlur: this.handleInputBlur
+			};
+			for (var key in this.props.inputProps) {
+				if (this.props.inputProps.hasOwnProperty(key) && key !== 'className') {
+					inputProps[key] = this.props.inputProps[key];
+				}
+			}
+
+			if (!this.props.disabled) {
+				if (this.props.searchable) {
+					input = React.createElement(Input, _extends({ value: this.state.inputValue, onChange: this.handleInputChange, minWidth: '5' }, inputProps));
+				} else {
+					input = React.createElement(
+						'div',
+						inputProps,
+						' '
+					);
+				}
+			} else if (!this.props.multi || !this.state.values.length) {
+				input = React.createElement(
+					'div',
+					{ className: 'Select-input' },
+					' '
+				);
+			}
+
+			return React.createElement(
+				'div',
+				{ ref: 'wrapper', className: selectClass },
+				React.createElement('input', { type: 'hidden', ref: 'value', name: this.props.name, value: this.state.value, disabled: this.props.disabled }),
+				React.createElement(
+					'div',
+					{ className: 'Select-control', ref: 'control', onKeyDown: this.handleKeyDown, onMouseDown: this.handleMouseDown, onTouchEnd: this.handleMouseDown },
+					value,
+					input,
+					React.createElement('span', { className: 'Select-arrow-zone', onMouseDown: this.handleMouseDownOnArrow }),
+					React.createElement('span', { className: 'Select-arrow', onMouseDown: this.handleMouseDownOnArrow }),
+					loading,
+					clear
+				),
+				menu
+			);
+		}
+
+	});
+
+	module.exports = Select;
+
+/***/ },
+/* 20 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+	var React = __webpack_require__(3);
+
+	var sizerStyle = { position: 'absolute', visibility: 'hidden', height: 0, width: 0, overflow: 'scroll', whiteSpace: 'nowrap' };
+
+	var AutosizeInput = React.createClass({
+		displayName: 'AutosizeInput',
+
+		propTypes: {
+			value: React.PropTypes.any, // field value
+			defaultValue: React.PropTypes.any, // default field value
+			onChange: React.PropTypes.func, // onChange handler: function(newValue) {}
+			style: React.PropTypes.object, // css styles for the outer element
+			className: React.PropTypes.string, // className for the outer element
+			minWidth: React.PropTypes.oneOfType([// minimum width for input element
+			React.PropTypes.number, React.PropTypes.string]),
+			inputStyle: React.PropTypes.object, // css styles for the input element
+			inputClassName: React.PropTypes.string // className for the input element
+		},
+		getDefaultProps: function getDefaultProps() {
+			return {
+				minWidth: 1
+			};
+		},
+		getInitialState: function getInitialState() {
+			return {
+				inputWidth: this.props.minWidth
+			};
+		},
+		componentDidMount: function componentDidMount() {
+			this.copyInputStyles();
+			this.updateInputWidth();
+		},
+		componentDidUpdate: function componentDidUpdate() {
+			this.updateInputWidth();
+		},
+		copyInputStyles: function copyInputStyles() {
+			if (!this.isMounted() || !window.getComputedStyle) {
+				return;
+			}
+			var inputStyle = window.getComputedStyle(React.findDOMNode(this.refs.input));
+			var widthNode = React.findDOMNode(this.refs.sizer);
+			widthNode.style.fontSize = inputStyle.fontSize;
+			widthNode.style.fontFamily = inputStyle.fontFamily;
+			widthNode.style.letterSpacing = inputStyle.letterSpacing;
+			if (this.props.placeholder) {
+				var placeholderNode = React.findDOMNode(this.refs.placeholderSizer);
+				placeholderNode.style.fontSize = inputStyle.fontSize;
+				placeholderNode.style.fontFamily = inputStyle.fontFamily;
+				placeholderNode.style.letterSpacing = inputStyle.letterSpacing;
+			}
+		},
+		updateInputWidth: function updateInputWidth() {
+			if (!this.isMounted() || typeof React.findDOMNode(this.refs.sizer).scrollWidth === 'undefined') {
+				return;
+			}
+			var newInputWidth;
+			if (this.props.placeholder) {
+				newInputWidth = Math.max(React.findDOMNode(this.refs.sizer).scrollWidth, React.findDOMNode(this.refs.placeholderSizer).scrollWidth) + 2;
+			} else {
+				newInputWidth = React.findDOMNode(this.refs.sizer).scrollWidth + 2;
+			}
+			if (newInputWidth < this.props.minWidth) {
+				newInputWidth = this.props.minWidth;
+			}
+			if (newInputWidth !== this.state.inputWidth) {
+				this.setState({
+					inputWidth: newInputWidth
+				});
+			}
+		},
+		getInput: function getInput() {
+			return this.refs.input;
+		},
+		focus: function focus() {
+			React.findDOMNode(this.refs.input).focus();
+		},
+		select: function select() {
+			React.findDOMNode(this.refs.input).select();
+		},
+		render: function render() {
+			var escapedValue = (this.props.value || '').replace(/\&/g, '&amp;').replace(/ /g, '&nbsp;').replace(/\</g, '&lt;').replace(/\>/g, '&gt;');
+			var wrapperStyle = this.props.style || {};
+			wrapperStyle.display = 'inline-block';
+			var inputStyle = _extends({}, this.props.inputStyle);
+			inputStyle.width = this.state.inputWidth;
+			inputStyle.boxSizing = 'content-box';
+			var placeholder = this.props.placeholder ? React.createElement(
+				'div',
+				{ ref: 'placeholderSizer', style: sizerStyle },
+				this.props.placeholder
+			) : null;
+			return React.createElement(
+				'div',
+				{ className: this.props.className, style: wrapperStyle },
+				React.createElement('input', _extends({}, this.props, { ref: 'input', className: this.props.inputClassName, style: inputStyle })),
+				React.createElement('div', { ref: 'sizer', style: sizerStyle, dangerouslySetInnerHTML: { __html: escapedValue } }),
+				placeholder
+			);
+		}
+	});
+
+	module.exports = AutosizeInput;
+
+/***/ },
+/* 21 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_RESULT__;/*!
 	  Copyright (c) 2015 Jed Watson.
 	  Licensed under the MIT License (MIT), see
 	  http://jedwatson.github.io/classnames
 	*/
-!function(){"use strict";function n(){for(var e="",t=0;t<arguments.length;t++){var s=arguments[t];if(s){var i=typeof s;if("string"===i||"number"===i)e+=" "+s;else if(Array.isArray(s))e+=" "+n.apply(null,s);else if("object"===i)for(var o in s)s.hasOwnProperty(o)&&s[o]&&(e+=" "+o)}}return e.substr(1)}"undefined"!=typeof e&&e.exports?e.exports=n:(i=function(){return n}.call(t,s,t,e),!(void 0!==i&&(e.exports=i)))}()},function(e,t,s){"use strict";var i=s(3),n=s(20),o=i.createClass({displayName:"Value",propTypes:{disabled:i.PropTypes.bool,onOptionLabelClick:i.PropTypes.func,onRemove:i.PropTypes.func,option:i.PropTypes.object.isRequired,optionLabelClick:i.PropTypes.bool,renderer:i.PropTypes.func},blockEvent:function(e){e.stopPropagation()},handleOnRemove:function(e){this.props.disabled||this.props.onRemove(e)},render:function(){var e=this.props.option.label;return this.props.renderer&&(e=this.props.renderer(this.props.option)),this.props.onRemove||this.props.optionLabelClick?(this.props.optionLabelClick&&(e=i.createElement("a",{className:n("Select-item-label__a",this.props.option.className),onMouseDown:this.blockEvent,onTouchEnd:this.props.onOptionLabelClick,onClick:this.props.onOptionLabelClick,style:this.props.option.style,title:this.props.option.title},e)),i.createElement("div",{className:n("Select-item",this.props.option.className),style:this.props.option.style,title:this.props.option.title},i.createElement("span",{className:"Select-item-icon",onMouseDown:this.blockEvent,onClick:this.handleOnRemove,onTouchEnd:this.handleOnRemove},"×"),i.createElement("span",{className:"Select-item-label"},e))):i.createElement("div",{className:n("Select-value",this.props.option.className),style:this.props.option.style,title:this.props.option.title},e)}});e.exports=o},function(e,t,s){"use strict";var i=s(3),n=s(20),o=i.createClass({displayName:"SingleValue",propTypes:{placeholder:i.PropTypes.string,value:i.PropTypes.object},render:function(){var e=n("Select-placeholder",this.props.value&&this.props.value.className);return i.createElement("div",{className:e,style:this.props.value&&this.props.value.style,title:this.props.value&&this.props.value.title},this.props.placeholder)}});e.exports=o},function(e,t,s){"use strict";var i=s(3),n=s(20),o=i.createClass({displayName:"Option",propTypes:{addLabelText:i.PropTypes.string,className:i.PropTypes.string,mouseDown:i.PropTypes.func,mouseEnter:i.PropTypes.func,mouseLeave:i.PropTypes.func,option:i.PropTypes.object.isRequired,renderFunc:i.PropTypes.func},blockEvent:function(e){e.preventDefault(),"A"===e.target.tagName&&"href"in e.target&&(e.target.target?window.open(e.target.href):window.location.href=e.target.href)},render:function(){var e=this.props.option,t=this.props.renderFunc(e),s=n(this.props.className,e.className);return e.disabled?i.createElement("div",{className:s,onMouseDown:this.blockEvent,onClick:this.blockEvent},t):i.createElement("div",{className:s,style:e.style,onMouseEnter:this.props.mouseEnter,onMouseLeave:this.props.mouseLeave,onMouseDown:this.props.mouseDown,onClick:this.props.mouseDown,title:e.title},e.create?this.props.addLabelText.replace("{label}",e.label):t)}});e.exports=o},function(e,t,s){"use strict";var i=Object.assign||function(e){for(var t=1;t<arguments.length;t++){var s=arguments[t];for(var i in s)Object.prototype.hasOwnProperty.call(s,i)&&(e[i]=s[i])}return e},n=s(25),o=s(5),a=s(13);e.exports=React.createClass({displayName:"exports",getInitialState:function(){return{name_field_error:null,mentions:[],name:null}},_onNameChange:function(e){var t=e.target.value,s=this.state.name_field_error;s=0!==t.indexOf("@")||t.length<3?"Alias name must start with @ and be longer than 3 characters.":null,this.setState({name:e.target.value,name_field_error:s})},_onMentionsChange:function(e){this.setState({mentions:e})},_onChange:function(){this.setState(this._getState())},_getState:function(){return{name_field_error:null,valid:!1}},_saveAlias:function(e){o.saveAlias(this.state.name,this.state.mentions),e.preventDefault()},_isValid:function(){return a.isNull(this.state.name_field_error)&&!a.isNull(this.state.name)&&this.state.mentions.length>0},render:function(){var e={"data-aui-notification-field":!0,"data-aui-notification-position":"top"};return a.isNull(this.state.name_field_error)?e["data-aui-notification-info"]="Must start with @":e["data-aui-notification-error"]=this.state.name_field_error,React.createElement("div",{className:"dialog"},React.createElement("div",{className:"aui-group instruction"},React.createElement("div",{className:"aui-item image"}),React.createElement("div",{className:"aui-item description"},React.createElement("h4",null,"Alias"),React.createElement("div",null,"Do you want to mention a bunch of people at the same time? Alias got you covered. It will remember who's who and help you @mention your whole team."))),React.createElement("form",{className:"aui top-label"},React.createElement("div",{className:"aui-group add-new-alias"},React.createElement("div",{className:"aui-item name"},React.createElement("div",{className:"field-group"},React.createElement("input",i({type:"text",className:"text",name:"alias",placeholder:"Alias name..."},e,{onChange:this._onNameChange})))),React.createElement("div",{className:"aui-item mentions"},React.createElement(n,{initialMentions:[],onChange:this._onMentionsChange})),React.createElement("div",{className:"aui-item actions"},React.createElement("input",{className:"button submit",type:"submit",value:"Add",onClick:this._saveAlias,disabled:!this._isValid()})))))}})},function(e,t,s){"use strict";var i=s(3),n=s(5),o=s(18);e.exports=i.createClass({displayName:"exports",getInitialState:function(){return{mentions:this.props.initialMentions}},_getSelectOptions:function(e,t){n.getUsers(e,t)},_onMentionsChange:function(e){var t=""!==e?e.split(","):[];this.setState({mentions:t}),this.props.onChange(t)},render:function(){var e=this.state.mentions,t=e.join(",");return i.createElement(o,{multi:!0,allowCreate:!0,value:t,delimitier:",",asyncOptions:this._getSelectOptions,onChange:this._onMentionsChange})}})},function(e,t,s){"use strict";var i=s(27);s(14);e.exports=React.createClass({displayName:"Spinner",componentWillMount:function(){i(_.contains(["small","medium","large"],this.props.size),"Spinner size must be either small, medium or large")},getDefaultProps:function(){return{size:"medium",zIndex:100}},componentDidMount:function(){this._setSpinner()},componentDidUpdate:function(){this._setSpinner()},_setSpinner:function(){var e;this.refs.spinner&&(this.props.spin?(e=this._getOptions(),AJS.$(React.findDOMNode(this.refs.spinner)).spin(this.props.size,e)):AJS.$(React.findDOMNode(this.refs.spinner)).spinStop())},_getOptions:function(){var e=this.props,t={color:"#000000"};return this.props.color||(t.color="#000000",e=_.merge(e,t)),e},render:function(){return React.createElement("div",{className:"hc-spinner "+(this.props.spinner_class?this.props.spinner_class:""),ref:"spinner"})}})},function(e,t,s){"use strict";var i=function(e,t,s,i,n,o,a,r){if(!e){var l;if(void 0===t)l=new Error("Minified exception occurred; use the non-minified dev environment for the full error message and additional helpful warnings.");else{var p=[s,i,n,o,a,r],u=0;l=new Error("Invariant Violation: "+t.replace(/%s/g,function(){return p[u++]}))}throw l.framesToPop=1,l}};e.exports=i},function(e,t){}]);
+
+	(function () {
+		'use strict';
+
+		function classNames () {
+
+			var classes = '';
+
+			for (var i = 0; i < arguments.length; i++) {
+				var arg = arguments[i];
+				if (!arg) continue;
+
+				var argType = typeof arg;
+
+				if ('string' === argType || 'number' === argType) {
+					classes += ' ' + arg;
+
+				} else if (Array.isArray(arg)) {
+					classes += ' ' + classNames.apply(null, arg);
+
+				} else if ('object' === argType) {
+					for (var key in arg) {
+						if (arg.hasOwnProperty(key) && arg[key]) {
+							classes += ' ' + key;
+						}
+					}
+				}
+			}
+
+			return classes.substr(1);
+		}
+
+		if (typeof module !== 'undefined' && module.exports) {
+			module.exports = classNames;
+		} else if (true){
+			// AMD. Register as an anonymous module.
+			!(__WEBPACK_AMD_DEFINE_RESULT__ = function () {
+				return classNames;
+			}.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+		} else {
+			window.classNames = classNames;
+		}
+
+	}());
+
+
+/***/ },
+/* 22 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(3);
+	var classes = __webpack_require__(21);
+
+	var Value = React.createClass({
+
+		displayName: 'Value',
+
+		propTypes: {
+			disabled: React.PropTypes.bool, // disabled prop passed to ReactSelect
+			onOptionLabelClick: React.PropTypes.func, // method to handle click on value label
+			onRemove: React.PropTypes.func, // method to handle remove of that value
+			option: React.PropTypes.object.isRequired, // option passed to component
+			optionLabelClick: React.PropTypes.bool, // indicates if onOptionLabelClick should be handled
+			renderer: React.PropTypes.func // method to render option label passed to ReactSelect
+		},
+
+		blockEvent: function blockEvent(event) {
+			event.stopPropagation();
+		},
+
+		handleOnRemove: function handleOnRemove(event) {
+			if (!this.props.disabled) {
+				this.props.onRemove(event);
+			}
+		},
+
+		render: function render() {
+			var label = this.props.option.label;
+			if (this.props.renderer) {
+				label = this.props.renderer(this.props.option);
+			}
+
+			if (!this.props.onRemove && !this.props.optionLabelClick) {
+				return React.createElement(
+					'div',
+					{
+						className: classes('Select-value', this.props.option.className),
+						style: this.props.option.style,
+						title: this.props.option.title
+					},
+					label
+				);
+			}
+
+			if (this.props.optionLabelClick) {
+
+				label = React.createElement(
+					'a',
+					{ className: classes('Select-item-label__a', this.props.option.className),
+						onMouseDown: this.blockEvent,
+						onTouchEnd: this.props.onOptionLabelClick,
+						onClick: this.props.onOptionLabelClick,
+						style: this.props.option.style,
+						title: this.props.option.title },
+					label
+				);
+			}
+
+			return React.createElement(
+				'div',
+				{ className: classes('Select-item', this.props.option.className),
+					style: this.props.option.style,
+					title: this.props.option.title },
+				React.createElement(
+					'span',
+					{ className: 'Select-item-icon',
+						onMouseDown: this.blockEvent,
+						onClick: this.handleOnRemove,
+						onTouchEnd: this.handleOnRemove },
+					'×'
+				),
+				React.createElement(
+					'span',
+					{ className: 'Select-item-label' },
+					label
+				)
+			);
+		}
+
+	});
+
+	module.exports = Value;
+
+/***/ },
+/* 23 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(3);
+	var classes = __webpack_require__(21);
+
+	var SingleValue = React.createClass({
+		displayName: 'SingleValue',
+
+		propTypes: {
+			placeholder: React.PropTypes.string, // this is default value provided by React-Select based component
+			value: React.PropTypes.object // selected option
+		},
+		render: function render() {
+
+			var classNames = classes('Select-placeholder', this.props.value && this.props.value.className);
+			return React.createElement(
+				'div',
+				{
+					className: classNames,
+					style: this.props.value && this.props.value.style,
+					title: this.props.value && this.props.value.title
+				},
+				this.props.placeholder
+			);
+		}
+	});
+
+	module.exports = SingleValue;
+
+/***/ },
+/* 24 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(3);
+	var classes = __webpack_require__(21);
+
+	var Option = React.createClass({
+		displayName: 'Option',
+
+		propTypes: {
+			addLabelText: React.PropTypes.string, // string rendered in case of allowCreate option passed to ReactSelect
+			className: React.PropTypes.string, // className (based on mouse position)
+			mouseDown: React.PropTypes.func, // method to handle click on option element
+			mouseEnter: React.PropTypes.func, // method to handle mouseEnter on option element
+			mouseLeave: React.PropTypes.func, // method to handle mouseLeave on option element
+			option: React.PropTypes.object.isRequired, // object that is base for that option
+			renderFunc: React.PropTypes.func // method passed to ReactSelect component to render label text
+		},
+
+		blockEvent: function blockEvent(event) {
+			event.preventDefault();
+			if (event.target.tagName !== 'A' || !('href' in event.target)) {
+				return;
+			}
+
+			if (event.target.target) {
+				window.open(event.target.href);
+			} else {
+				window.location.href = event.target.href;
+			}
+		},
+
+		render: function render() {
+			var obj = this.props.option;
+			var renderedLabel = this.props.renderFunc(obj);
+			var optionClasses = classes(this.props.className, obj.className);
+
+			return obj.disabled ? React.createElement(
+				'div',
+				{ className: optionClasses,
+					onMouseDown: this.blockEvent,
+					onClick: this.blockEvent },
+				renderedLabel
+			) : React.createElement(
+				'div',
+				{ className: optionClasses,
+					style: obj.style,
+					onMouseEnter: this.props.mouseEnter,
+					onMouseLeave: this.props.mouseLeave,
+					onMouseDown: this.props.mouseDown,
+					onClick: this.props.mouseDown,
+					title: obj.title },
+				obj.create ? this.props.addLabelText.replace('{label}', obj.label) : renderedLabel
+			);
+		}
+	});
+
+	module.exports = Option;
+
+/***/ },
+/* 25 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+	var MentionSelect = __webpack_require__(26),
+	    AliasActions = __webpack_require__(5),
+	    _ = __webpack_require__(14);
+
+	module.exports = React.createClass({
+	  displayName: "exports",
+
+	  getInitialState: function getInitialState() {
+	    return {
+	      name_field_error: null,
+	      mentions: [],
+	      name: null
+	    };
+	  },
+
+	  _onNameChange: function _onNameChange(e) {
+	    var name = e.target.value;
+	    var name_field_error = this.state.name_field_error;
+	    if (name.indexOf("@") !== 0 || name.length < 3) {
+	      name_field_error = "Alias name must start with @ and be longer than 3 characters.";
+	    } else {
+	      name_field_error = null;
+	    }
+
+	    this.setState({
+	      name: e.target.value,
+	      name_field_error: name_field_error
+	    });
+	  },
+
+	  _onMentionsChange: function _onMentionsChange(mentions) {
+	    this.setState({
+	      mentions: mentions
+	    });
+	  },
+
+	  _onChange: function _onChange() {
+	    this.setState(this._getState());
+	  },
+
+	  _getState: function _getState() {
+	    return {
+	      name_field_error: null,
+	      valid: false
+	    };
+	  },
+
+	  _saveAlias: function _saveAlias(e) {
+	    AliasActions.saveAlias(this.state.name, this.state.mentions);
+
+	    e.preventDefault();
+	  },
+
+	  _isValid: function _isValid() {
+	    return _.isNull(this.state.name_field_error) && !_.isNull(this.state.name) && this.state.mentions.length > 0;
+	  },
+
+	  render: function render() {
+
+	    var nameInputValidationAtrributes = {
+	      "data-aui-notification-field": true,
+	      "data-aui-notification-position": "top"
+	    };
+
+	    if (!_.isNull(this.state.name_field_error)) {
+	      nameInputValidationAtrributes["data-aui-notification-error"] = this.state.name_field_error;
+	    } else {
+	      nameInputValidationAtrributes["data-aui-notification-info"] = "Must start with @";
+	    }
+
+	    return React.createElement(
+	      "div",
+	      { className: "dialog" },
+	      React.createElement(
+	        "div",
+	        { className: "aui-group instruction" },
+	        React.createElement("div", { className: "aui-item image" }),
+	        React.createElement(
+	          "div",
+	          { className: "aui-item description" },
+	          React.createElement(
+	            "h4",
+	            null,
+	            "Alias"
+	          ),
+	          React.createElement(
+	            "div",
+	            null,
+	            "Do you want to mention a bunch of people at the same time? Alias got you covered. It will remember who's who and help you @mention your whole team."
+	          )
+	        )
+	      ),
+	      React.createElement(
+	        "form",
+	        { className: "aui top-label" },
+	        React.createElement(
+	          "div",
+	          { className: "aui-group add-new-alias" },
+	          React.createElement(
+	            "div",
+	            { className: "aui-item name" },
+	            React.createElement(
+	              "div",
+	              { className: "field-group" },
+	              React.createElement("input", _extends({ type: "text", className: "text", name: "alias", placeholder: "Alias name..."
+	              }, nameInputValidationAtrributes, {
+	                onChange: this._onNameChange }))
+	            )
+	          ),
+	          React.createElement(
+	            "div",
+	            { className: "aui-item mentions" },
+	            React.createElement(MentionSelect, { initialMentions: [],
+	              onChange: this._onMentionsChange })
+	          ),
+	          React.createElement(
+	            "div",
+	            { className: "aui-item actions" },
+	            React.createElement("input", { className: "button submit", type: "submit", value: "Add", onClick: this._saveAlias,
+	              disabled: !this._isValid() })
+	          )
+	        )
+	      )
+	    );
+	  }
+
+	});
+
+/***/ },
+/* 26 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var React = __webpack_require__(3),
+	    AliasActions = __webpack_require__(5),
+	    Select = __webpack_require__(19);
+
+	module.exports = React.createClass({
+	  displayName: "exports",
+
+	  getInitialState: function getInitialState() {
+	    return {
+	      mentions: this.props.initialMentions
+	    };
+	  },
+
+	  _getSelectOptions: function _getSelectOptions(input, callback) {
+	    AliasActions.getUsers(input, callback);
+	  },
+
+	  _onMentionsChange: function _onMentionsChange(val) {
+	    var mentions = val !== "" ? val.split(",") : [];
+	    this.setState({
+	      mentions: mentions
+	    });
+	    this.props.onChange(mentions);
+	  },
+
+	  render: function render() {
+	    var mentions = this.state.mentions;
+	    var value = mentions.join(",");
+
+	    return React.createElement(Select, { multi: true,
+	      allowCreate: true,
+	      value: value,
+	      delimitier: ",",
+	      asyncOptions: this._getSelectOptions,
+	      onChange: this._onMentionsChange });
+	  }
+
+	});
+
+/***/ },
+/* 27 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var invariant = __webpack_require__(28),
+	    $ = __webpack_require__(15);
+
+	module.exports = React.createClass({
+
+	  displayName: "Spinner",
+
+	  componentWillMount: function componentWillMount() {
+	    invariant(_.contains(["small", "medium", "large"], this.props.size), "Spinner size must be either small, medium or large");
+	  },
+
+	  getDefaultProps: function getDefaultProps() {
+	    return {
+	      size: 'medium',
+	      zIndex: 100
+	    };
+	  },
+
+	  componentDidMount: function componentDidMount() {
+	    this._setSpinner();
+	  },
+
+	  componentDidUpdate: function componentDidUpdate() {
+	    this._setSpinner();
+	  },
+
+	  _setSpinner: function _setSpinner() {
+	    var options;
+
+	    if (this.refs.spinner) {
+	      if (this.props.spin) {
+	        options = this._getOptions();
+	        AJS.$(React.findDOMNode(this.refs.spinner)).spin(this.props.size, options);
+	      } else {
+	        AJS.$(React.findDOMNode(this.refs.spinner)).spinStop();
+	      }
+	    }
+	  },
+
+	  _getOptions: function _getOptions() {
+	    var options = this.props,
+	        colorOptions = {
+	      color: "#000000"
+	    };
+
+	    if (!this.props.color) {
+	      colorOptions.color = "#000000";
+	      options = _.merge(options, colorOptions);
+	    }
+	    return options;
+	  },
+
+	  render: function render() {
+	    return React.createElement("div", { className: "hc-spinner " + (this.props.spinner_class ? this.props.spinner_class : ""), ref: "spinner" });
+	  }
+	});
+
+/***/ },
+/* 28 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(process) {/**
+	 * Copyright 2013-2015, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 *
+	 * @providesModule invariant
+	 */
+
+	"use strict";
+
+	/**
+	 * Use invariant() to assert state which your program assumes to be true.
+	 *
+	 * Provide sprintf-style format (only %s is supported) and arguments
+	 * to provide information about what broke and what you were
+	 * expecting.
+	 *
+	 * The invariant message will be stripped in production, but the invariant
+	 * will remain to ensure logic does not differ in production.
+	 */
+
+	var invariant = function(condition, format, a, b, c, d, e, f) {
+	  if ("production" !== process.env.NODE_ENV) {
+	    if (format === undefined) {
+	      throw new Error('invariant requires an error message argument');
+	    }
+	  }
+
+	  if (!condition) {
+	    var error;
+	    if (format === undefined) {
+	      error = new Error(
+	        'Minified exception occurred; use the non-minified dev environment ' +
+	        'for the full error message and additional helpful warnings.'
+	      );
+	    } else {
+	      var args = [a, b, c, d, e, f];
+	      var argIndex = 0;
+	      error = new Error(
+	        'Invariant Violation: ' +
+	        format.replace(/%s/g, function() { return args[argIndex++]; })
+	      );
+	    }
+
+	    error.framesToPop = 1; // we don't care about invariant's own frame
+	    throw error;
+	  }
+	};
+
+	module.exports = invariant;
+
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+
+/***/ },
+/* 29 */
+/***/ function(module, exports) {
+
+	// removed by extract-text-webpack-plugin
+
+/***/ }
+/******/ ]);

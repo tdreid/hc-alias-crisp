@@ -86,13 +86,19 @@ def alias(request):
 
 
 @asyncio.coroutine
-@addon.webpanel("alias.dialog", "Choose alias", location="hipchat.sidebar.right", path="/dialog")
+@addon.dialog("alias.dialog", "Choose alias", path="/dialog",
+              options={
+                  "size": {
+                      "width": "600px",
+                      "height": "240px"
+                  }
+              })
 @aiohttp_jinja2.template('dialog.jinja2')
 def dialog(request):
 
     return {
         "base_url": app["config"]["BASE_URL"],
-        "signed_request": request.signed_request,
+        "signed_request": request.token,
     }
 
 @asyncio.coroutine
