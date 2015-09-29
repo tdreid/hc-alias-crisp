@@ -1,5 +1,7 @@
 import asyncio
+import re
 
+invalid_mention_name_chars = '<>~!@#$%^&*()=+[]{}\\|:;\'"/,.-_'
 
 class AliasController:
 
@@ -94,4 +96,29 @@ def _aliases_db(app):
     return app['mongodb'].default_database['aliases']
 
 def create_webhook_pattern(alias):
-    return "(?:(?:^[^/]|\/[^a]|\/a[^l]|\/ali[^a]|\/alia[^s]).*|^)%s(?:$| ).*" % alias
+    return "(?:(?:^[^/]|\/[^a]|\/a[^l]|\/ali[^a]|\/alia[^s]).*|^)%s(?:$| |[%s]).*" \
+           % (alias, re.escape(invalid_mention_name_chars))
+
+def validate_mention_name(mention_name: str):
+    """
+    Validates a mention name, throwing a ValueError if invalid.
+    """
+
+    if mention_name is None:
+        raise ValueError("The mention name is required")
+
+    if not mention_name.startswith("@"):
+        raise ValueError("The mention name must begin with a '@'")
+
+    if not 0 < len(mention_name) < 50:
+        raise ValueError("The mention name must be between 0 and 50 characters")
+
+    name = mention_name[1:]
+    if name in ["all", "aii", "hipchat"]:
+        raise ValueError("The mention name is not valid")
+
+    if any(x in name for x in invalid_mention_name_chars):
+        raise ValueError("The mention name cannot contain certain characters: %s" %
+                         invalid_mention_name_chars)
+    if ' ' in name:
+        raise ValueError("The mention name cannot contain multiple words")

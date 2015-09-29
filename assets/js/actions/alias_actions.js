@@ -34,7 +34,7 @@ var AliasActions = {
   },
 
   appendAliasToChat: function(alias) {
-    let mentionsText = alias.alias + ": ";
+    let mentionsText = alias.alias + "\uFF1A"; //using full-width colon to avoid mention regex to match
     _.each(alias.mentions, (mention) => {
       mentionsText += mention + " ";
     });
