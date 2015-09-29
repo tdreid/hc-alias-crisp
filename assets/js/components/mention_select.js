@@ -1,6 +1,7 @@
 var React = require("react/addons"),
     AliasActions = require("actions/alias_actions"),
-    Select = require('react-select');
+    Select = require('react-select'),
+    _ = require("lodash");
 
 module.exports = React.createClass({
 
@@ -16,6 +17,15 @@ module.exports = React.createClass({
 
   _onMentionsChange: function(val) {
     let mentions = val !== "" ? val.split(",") : [];
+    mentions = _.map(mentions, (mention) => {
+      if (mention.indexOf("@") !== 0) {
+        mention = "@" + mention;
+      }
+
+      return mention;
+    });
+
+
     this.setState({
       mentions: mentions
     });

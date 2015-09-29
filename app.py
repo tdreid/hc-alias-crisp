@@ -10,7 +10,11 @@ from util import HtmlNotification
 from util import RoomNotificationArgumentParser
 from alias_controller import AliasController
 
+SCOPES_V1 = ["view_group", "send_notification", "admin_room"]
 SCOPES_V2 = ["view_group", "send_notification", "admin_room", "view_room"]
+
+def get_scopes(context):
+    return SCOPES_V2 if context.get("hipchat_server", False) else SCOPES_V1
 
 FROM_NAME = "Alias"
 PARTICIPANTS_CACHE_KEY = "hipchat-participants:{group_id}:{room_id}"
@@ -21,7 +25,7 @@ app, addon = create_addon_app(addon_key="hc-alias",
                        vendor_name="Atlassian",
                        vendor_url="https://atlassian.com",
                        from_name=FROM_NAME,
-                       scopes=SCOPES_V2)
+                       scopes=get_scopes)
 
 static_folder = os.path.join(os.path.dirname(__file__), 'assets')
 static_route = app.router.add_static('/assets', static_folder, name='static')

@@ -1,8 +1,8 @@
 var React = require("react/addons"),
     AliasActions = require("actions/alias_actions"),
     AliasStore = require("stores/alias_store"),
-    _ = require("lodash"),
-    Select = require('react-select');
+    MentionSelect = require("components/mention_select"),
+    _ = require("lodash");
 
 module.exports = React.createClass({
 
@@ -53,6 +53,10 @@ module.exports = React.createClass({
     e.stopPropagation();
   },
 
+  _isValidEdit: function() {
+    return false;
+  },
+
   _renderEdit: function() {
 
     let mentions = this.state.edited_mentions || this.props.mentions;
@@ -64,15 +68,12 @@ module.exports = React.createClass({
           <span className="hc-mention hc-mention-me">{this.props.alias}</span>
         </td>
         <td className="mentions">
-          <Select multi={true}
-                  allowCreate={true}
-                  value={value}
-                  delimitier=","
-                  asyncOptions={this._getSelectOptions}
-                  onChange={this._onMentionsChange}/>
+          <MentionSelect initialMentions={mentions}
+                         onChange={this._onMentionsChange}/>
         </td>
         <td className="actions aui-compact-button-column">
-          <a className="aui-icon aui-icon-small aui-iconfont-success save" onClick={this._saveEdit}>Edit</a>
+          <a className="aui-icon aui-icon-small aui-iconfont-success save" onClick={this._saveEdit}
+             disabled={!this._isValidEdit()}>Edit</a>
           <a className="aui-icon aui-icon-small aui-iconfont-undo cancel" onClick={this._cancelEdit}>Delete</a>
         </td>
       </tr>
@@ -84,7 +85,7 @@ module.exports = React.createClass({
   },
 
   _saveEdit: function() {
-    AliasActions.updateMentions(this.props.alias, this.state.edited_mentions || this.props.mentions);
+    AliasActions.updateMentions(this.props.alias, !_.isEmpty(this.state.edited_mentions) ? this.state.edited_mentions : this.props.mentions);
     this.setState({
       edit: false
     });
@@ -96,8 +97,7 @@ module.exports = React.createClass({
     });
   },
 
-  _onMentionsChange: function(val) {
-    let mentions = val.split(",");
+  _onMentionsChange: function(mentions) {
     this.setState({
       edited_mentions: mentions
     });
