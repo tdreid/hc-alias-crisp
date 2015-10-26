@@ -1,0 +1,40 @@
+{
+  "name": "hc-alias",
+  "version": "0.0.1",
+  "description": "A simple HipChat add-on that supports group mentions via room notifications.",
+  "main": "index.js",
+  "scripts": {
+    "build": "./node_modules/.bin/webpack --config webpack.dev.config.js --progress --colors",
+    "watch": "./node_modules/.bin/webpack --config webpack.dev.config.js --colors --watch",
+    "build-production": "./node_modules/.bin/webpack --config webpack.prod.config.js --progress --colors",
+    "postinstall": "npm run build-production"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@bitbucket.org/mrdon/hc-alias.git"
+  },
+  "author": "HipChat <hipchat@atlassian.com>",
+  "license": "APL",
+  "homepage": "https://bitbucket.org/mrdon/hc-alias#readme",
+  "devDependencies": {
+    "babel": "^5.8.23",
+    "babel-core": "^5.8.23",
+    "babel-loader": "^5.3.2",
+    "css-loader": "^0.17.0",
+    "cwd": "^0.8.0",
+    "extract-text-webpack-plugin": "^0.8.2",
+    "file-loader": "^0.8.4",
+    "fs": "0.0.2",
+    "less": "^2.5.1",
+    "less-loader": "^2.2.0",
+    "react": "^0.13.3",
+    "style-loader": "^0.12.3",
+    "webpack": "^1.12.1",
+    "webpack-bundle-tracker": "0.0.8"
+  },
+  "dependencies": {
+    "flux": "^2.1.1",
+    "immutable": "^3.7.5",
+    "react-select": "^0.6.7"
+  }
+}
