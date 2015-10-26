@@ -1,5 +1,6 @@
 var MentionSelect = require("components/mention_select"),
     AliasActions = require("actions/alias_actions"),
+    AppDispatcher = require("dispatcher/alias_app_dispatcher"),
     _ = require("lodash");
 
 module.exports = React.createClass({
@@ -8,8 +9,21 @@ module.exports = React.createClass({
     return {
       name_field_error: null,
       mentions: [],
-      name: null
+      name: null,
+      saving: false
     }
+  },
+
+  componentDidMount: function() {
+    AppDispatcher.register(action => {
+      switch(action.type) {
+        case "alias-saved":
+          this.setState({saving: false});
+          break;
+        default:
+          break;
+      }
+    });
   },
 
   _onNameChange: function(e) {
@@ -45,6 +59,9 @@ module.exports = React.createClass({
   },
 
   _saveAlias: function(e) {
+    this.setState({
+      saving: true
+    });
     AliasActions.saveAlias(this.state.name, this.state.mentions);
 
     e.preventDefault();
@@ -101,7 +118,7 @@ module.exports = React.createClass({
 
               <div className="aui-item actions">
                 <input className="button submit" type="submit" value="Add" onClick={this._saveAlias}
-                        disabled={!this._isValid()}/>
+                        disabled={!this._isValid() || this.state.saving}/>
               </div>
           </div>
         </form>

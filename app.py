@@ -30,16 +30,34 @@ app, addon = create_addon_app(addon_key="hc-alias",
 static_folder = os.path.join(os.path.dirname(__file__), 'assets')
 static_route = app.router.add_static('/assets', static_folder, name='static')
 
-alias_controller = AliasController(app["config"]["BASE_URL"], app['mongodb'].default_database['aliases'])
+alias_controller = AliasController(app["config"]["BASE_URL"], app['mongodb']['aliases'])
 
 @asyncio.coroutine
 def init(app):
     @asyncio.coroutine
     def send_welcome(event):
         client = event['client']
-        yield from client.room_client.send_notification(text="HC Alias was added to this room")
+        asyncio.async(client.room_client.send_notification(text="HC Alias was added to this room"))
+
+    @asyncio.coroutine
+    def register_existing_alias(client, alias):
+
+        new_alias = yield from alias_controller.add_alias(client, alias["alias"], alias["mentions"], delete_existing=False)
+        if new_alias:
+            log.info("Existing Alias %s re-registered" % alias["alias"])
+        else:
+            log.error("Problem registering webhook")
+
+    @asyncio.coroutine
+    def register_existing_aliases(event):
+        client = event['client']
+        aliases = yield from alias_controller.find_all_alias(client)
+        log.info("Found {0} existing aliases. Registering webhooks for them".format(len(aliases)))
+        for alias in aliases:
+            asyncio.async(register_existing_alias(client, alias))
 
     app['addon'].register_event('install', send_welcome)
+    app['addon'].register_event('install', register_existing_aliases)
 
 def init_jinja2():
     jinja2_env = aiohttp_jinja2.setup(app, autoescape=True,
@@ -133,7 +151,8 @@ def add_alias(request):
     body = yield from request.json()
 
     yield from alias_controller.add_alias(request.client, alias_name, body["mentions"])
-    return (yield from get_aliases(request))
+    aliases = yield from get_aliases(request)
+    return aliases
 
 
 @asyncio.coroutine

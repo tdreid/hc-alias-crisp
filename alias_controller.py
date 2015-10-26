@@ -1,5 +1,8 @@
 import asyncio
+import logging
 import re
+
+log = logging.getLogger(__name__)
 
 invalid_mention_name_chars = '<>~!@#$%^&*()=+[]{}\\|:;\'"/,.-_'
 
@@ -10,20 +13,19 @@ class AliasController:
         self.db = db
 
     @asyncio.coroutine
-    def add_alias(self, client, alias_name, mentions):
+    def add_alias(self, client, alias_name, mentions, delete_existing=True):
 
         existing = yield from self.find_alias(client, alias_name)
 
-        if existing and 'webhook_url' in existing:
+        if delete_existing and existing and 'webhook_url' in existing:
             yield from client.room_client.delete_webhook(existing['webhook_url'])
 
-        if not existing:
+        webhook_url = yield from client.room_client.create_webhook(
+            url="%s/mention/%s" % (self.base_url, alias_name),
+            pattern=create_webhook_pattern(alias_name),
+            name="Alias %s" % alias_name)
 
-            webhook_url = yield from client.room_client.create_webhook(
-                url="%s/mention/%s" % (self.base_url, alias_name),
-                pattern=create_webhook_pattern(alias_name),
-                name="Alias %s" % alias_name)
-
+        if webhook_url:
             spec = {
                 "client_id": client.id,
                 "group_id": client.group_id,
@@ -35,8 +37,12 @@ class AliasController:
                 'webhook_url': webhook_url
             }
 
-            data.update(spec)
-            yield from self.db.insert(data)
+            if existing:
+                existing.update(data)
+                yield from self.db.update(spec, existing)
+            else:
+                data.update(spec)
+                yield from self.db.insert(data)
             return data
 
         return None
@@ -84,11 +90,16 @@ class AliasController:
 
     @asyncio.coroutine
     def find_all_alias(self, client):
-        results = yield from self.db.find({
+        results = []
+        cursor = self.db.find({
             "client_id": client.id,
             "group_id": client.group_id,
             "capabilities_url": client.capabilities_url
         })
+
+        while (yield from cursor.fetch_next):
+            results.append(cursor.next_object())
+
         return results
 
 

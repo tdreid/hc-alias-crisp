@@ -4,6 +4,7 @@ var React = require("react/addons"),
     Alias = require("components/alias"),
     AddAlias = require("components/add_alias"),
     Spinner = require("components/spinner"),
+    AP = require("AP"),
     _ = require("lodash");
 
 module.exports = React.createClass({
@@ -50,10 +51,20 @@ module.exports = React.createClass({
   },
 
   _renderAliases: function() {
+    AP.require(["dialog"], (dialog) => {
+      dialog.update({
+        title: "Choose alias"
+      })
+    });
     return _.map(this.state.aliases, this._renderAlias);
   },
 
   _renderAddNew: function() {
+    AP.require(["dialog"], (dialog) => {
+      dialog.update({
+        title: "Add a new alias"
+      })
+    });
     return <AddAlias />;
   },
 
