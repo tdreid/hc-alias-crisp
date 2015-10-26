@@ -1,9 +1,9 @@
 import unittest
-from app import create_webhook_pattern
+from alias_controller import create_webhook_pattern
 import re
 
 
-class TestApp(unittest.TestCase):
+class TestAliasController(unittest.TestCase):
 
     def test_alias_at_beginning_match(self):
         self.assertRegex("@ops", re.compile(create_webhook_pattern("@ops")))
@@ -16,4 +16,9 @@ class TestApp(unittest.TestCase):
 
     def test_match_other_slash_command(self):
         self.assertRegex("/avocado @ops", re.compile(create_webhook_pattern("@ops")))
+
+    def test_alias_with_punctuation_following(self):
+        self.assertRegex("Hey @dos, can you help me?", re.compile(create_webhook_pattern("@dos")))
+        self.assertRegex("Hey (@dos) can you help me?", re.compile(create_webhook_pattern("@dos")))
+        self.assertRegex("Hey @dos: can you help me?", re.compile(create_webhook_pattern("@dos")))
 

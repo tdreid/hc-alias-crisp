@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% block head %}
+        <meta charset="UTF-8">
+        <title>{% block title %}{% endblock %} - HC Alias</title>
+
+        <link rel="stylesheet" href="//aui-cdn.atlassian.com/aui-adg/5.9.0/css/aui.css" media="all">
+        <link rel="stylesheet" href="//aui-cdn.atlassian.com/aui-adg/5.9.0/css/aui-experimental.css" media="all">
+        <link rel="stylesheet" href="{{url_for('static', 'bundles/main.css')}}" media="all">
+        <script src="//fb.me/react-with-addons-0.13.3.min.js"></script>
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+        <script src="//aui-cdn.atlassian.com/aui-adg/5.9.0/js/aui.js"></script>
+        <script src="//aui-cdn.atlassian.com/aui-adg/5.9.0/js/aui-experimental.js"></script>
+
+        <script src="//cdnjs.cloudflare.com/ajax/libs/URI.js/1.16.0/URI.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/spin.js/2.3.2/spin.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/3.10.1/lodash.min.js"></script>
+
+        <script src="{{ url_for('static', 'lib/iframe.min.js') }}"></script>
+
+        <meta name="acpt" content="{{signed_request}}">
+        <meta name="base-url" content="{{base_url}}">
+
+    {% endblock %}
+</head>
+<body class="{% block bodyClasses %} {% endblock %}">
+    {% block content %}
+    {% endblock %}
+    <script src="{{url_for('static', 'bundles/main.js')}}"></script>
+</body>
+</html>
