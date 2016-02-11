@@ -77,6 +77,8 @@ class AliasController:
                 self.db.remove(existing)
             ])
 
+            return existing
+
     @asyncio.coroutine
     def find_alias(self, client, name):
         result = yield from self.db.find_one({
