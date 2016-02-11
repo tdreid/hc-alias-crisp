@@ -262,7 +262,7 @@ def _create_parser(client, request):
         existing = yield from alias_controller.find_alias(client, args.alias)
         if existing and 'webhook_url' in existing:
             mentions = ['&commat;%s' % x[1:] for x in existing['mentions']]
-            return HtmlNotification("Alias %s is mapped to %s" % (args.alias, ", ".join(mentions)))
+            return HtmlNotification("Alias %s is mapped to %s" % (args.alias, " ".join(mentions)))
         else:
             return "Alias %s not found" % args.alias
 
