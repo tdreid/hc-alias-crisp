@@ -1,1 +1,1 @@
-web: gunicorn -k aiohttp.worker.GunicornWebWorker app:app
+web: gunicorn -k aiohttp.worker.GunicornWebWorker app:app --graceful-timeout 10
