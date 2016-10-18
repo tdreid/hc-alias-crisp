@@ -183,7 +183,7 @@ def mention(request):
             original=body['item']["message"]["message"],
             mentions=" ".join(mentions))
         from_mention = body['item']['message']['from']['mention_name']
-        yield from client.room_client.send_notification(from_mention=from_mention, text=txt)
+        yield from client.room_client.send_notification(from_mention=from_mention, text=txt, notify=True)
 
         return web.HTTPNoContent()
     else:
