@@ -9,7 +9,8 @@ class AliasStore extends Store {
     return {
       aliases: [],
       adding_alias: false,
-      loading: true
+      loading: true,
+      roomParticipants: []
     };
   }
 
@@ -42,6 +43,9 @@ class AliasStore extends Store {
           this.set({
             "adding_alias": true
           });
+          break;
+        case "get-room-participants":
+          this.set("roomParticipants", action.payload.roomParticipants);
           break;
       }
     });

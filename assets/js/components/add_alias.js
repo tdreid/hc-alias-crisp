@@ -1,5 +1,6 @@
 var MentionSelect = require("components/mention_select"),
     AliasActions = require("actions/alias_actions"),
+    AliasStore = require("stores/alias_store"),
     AppDispatcher = require("dispatcher/alias_app_dispatcher"),
     _ = require("lodash");
 
@@ -10,11 +11,13 @@ module.exports = React.createClass({
       name_field_error: null,
       mentions: [],
       name: null,
-      saving: false
+      saving: false,
+      roomParticipants: AliasStore.get('roomParticipants')
     }
   },
 
   componentDidMount: function() {
+    AliasStore.on("change", this._onStoreChange);
     AppDispatcher.register(action => {
       switch(action.type) {
         case "alias-saved":
@@ -26,6 +29,11 @@ module.exports = React.createClass({
     });
   },
 
+  _onStoreChange: function() {
+    var roomParticipants = AliasStore.get('roomParticipants')
+    this.setState({ roomParticipants });
+  },
+
   _onNameChange: function(e) {
     let name = e.target.value;
     let name_field_error = this.state.name_field_error;
@@ -35,10 +43,14 @@ module.exports = React.createClass({
       name_field_error = null;
     }
 
+    if (_.some(this.state.roomParticipants, (user) => user.mention_name === name.slice(1))) {
+      name_field_error = "Alias name is already used for another user."
+    }
+
     this.setState({
       name: e.target.value,
       name_field_error: name_field_error
-    });
+    })
   },
 
   _onMentionsChange: function(mentions) {

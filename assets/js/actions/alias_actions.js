@@ -52,6 +52,14 @@ var AliasActions = {
       type: "GET",
       dataType: "json"
     }).done(function(users) {
+
+      AppDispatcher.dispatch({
+        type: "get-room-participants",
+        payload: {
+          roomParticipants: users
+        }
+      });
+
       let options = _.map(users, (user) => {
         return {
           value: "@" + user.mention_name,
