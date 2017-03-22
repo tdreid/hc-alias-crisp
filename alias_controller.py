@@ -109,8 +109,10 @@ def _aliases_db(app):
     return app['mongodb'].default_database['aliases']
 
 def create_webhook_pattern(alias):
+    case_insensitive_alias = "".join(["[{0}{1}]".format(char.lower(), char.upper()) for char in alias])
+
     return "(?:(?:^[^/]|\/[^a]|\/a[^l]|\/ali[^a]|\/alia[^s]).*|^)%s(?:$| |[%s]).*" \
-           % (alias, re.escape(invalid_mention_name_chars))
+           % (case_insensitive_alias, re.escape(invalid_mention_name_chars))
 
 def validate_mention_name(mention_name: str):
     """
