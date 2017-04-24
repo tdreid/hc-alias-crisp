@@ -201,7 +201,7 @@ def get_room_participants(request):
     results = json.loads(cached_data) if cached_data else None
 
     if not results:
-        participants = yield from request.client.room_client.get_participants(room_id)
+        participants = yield from request.client.room_client.get_participants(room_id, include_offline=True)
 
         results = []
         for participant in participants:
