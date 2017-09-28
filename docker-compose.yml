@@ -1,7 +1,7 @@
 version: "2"
 services:
-    alia:
-        image: atlassian_labs/alias:latest
+    alias:
+        image: atlassianlabs/alias:latest
         environment:
             - BASE_URL
             - MONGO_URL=mongodb://mongo:27017/alias
