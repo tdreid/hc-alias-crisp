@@ -1,0 +1,17 @@
+version: "2"
+services:
+    alias:
+        image: atlassianlabs/alias:latest
+        environment:
+            - BASE_URL
+            - MONGO_URL=mongodb://mongo:27017/alias
+            - REDIS_URL=redis://redis:6379/alias
+            - PORT=3022
+        ports:
+            - 3022:3022
+    redis:
+        image: redis:3.2.11-alpine
+        command: redis-server --appendonly yes
+    mongo:
+        image: mongo:3.4
+
