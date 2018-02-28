@@ -179,9 +179,7 @@ def mention(request):
     if existing:
         mentions = existing['mentions']
 
-        txt = "said: {original} /cc {mentions}".format(
-            original=body['item']["message"]["message"],
-            mentions=" ".join(mentions))
+        txt = "^^ {mentions}".format(mentions=" ".join(mentions))
         from_mention = body['item']['message']['from']['mention_name']
         yield from client.room_client.send_notification(from_mention=from_mention, text=txt, notify=True)
 
