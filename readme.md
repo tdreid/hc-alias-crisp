@@ -1,6 +1,11 @@
-# Alias #
+# Alias (The Crisp Variety) #
 
 A simple HipChat add-on that supports group mentions via room notifications.
+
+The only difference between this and [the official code from Atlassian]() 
+is that it doesn't repeat the original message.  It just tags the group
+and refers to the previous message with `"^^"`.
+
 # Commands #
 
 ```
