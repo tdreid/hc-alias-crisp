@@ -11,7 +11,7 @@ arrow==0.6.0
 motor==0.5
 #asyncio-redis==0.14.1
 -e git+https://github.com/mrdon/asyncio-redis.git#egg=asyncio-redis-mrdon
-bleach==1.4.1
+bleach==3.1.1
 cchardet==0.3.5
 chardet==2.3.0
 gunicorn==19.5.0
