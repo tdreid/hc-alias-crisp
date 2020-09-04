@@ -27,7 +27,7 @@
     "fs": "0.0.2",
     "less": "^2.5.1",
     "less-loader": "^2.2.0",
-    "react": "^0.13.3",
+    "react": "^16.13.1",
     "style-loader": "^0.12.3",
     "webpack": "^1.12.1",
     "webpack-bundle-tracker": "0.0.8"
