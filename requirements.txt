@@ -2,7 +2,7 @@ Jinja2==2.8
 Markdown==2.6.2
 MarkupSafe==0.23
 PyJWT==1.4.0
-aiohttp==0.21.0
+aiohttp==3.7.4
 # aiohttp_ac_hipchat==0.4.6
 -e git+https://bitbucket.org/atlassianlabs/aiohttp_ac_hipchat.git@v0.4.6#egg=aiohttp_ac_hipchat
 #-e ../aiohttp_ac_hipchat
